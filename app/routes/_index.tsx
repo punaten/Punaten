@@ -1,5 +1,5 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
-
+import { Box } from "@yamada-ui/react";
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -13,23 +13,25 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://developers.cloudflare.com/pages/framework-guides/deploy-a-remix-site/"
-            rel="noreferrer"
-          >
-            Cloudflare Pages Docs - Remix guide
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+      <Box w="full" h="100dvh" bgGradient="linear(to-r, purple.500, blue.400)" >
+        <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
+        <ul>
+          <li>
+            <a
+              target="_blank"
+              href="https://developers.cloudflare.com/pages/framework-guides/deploy-a-remix-site/"
+              rel="noreferrer"
+            >
+              Cloudflare Pages Docs - Remix guide
+            </a>
+          </li>
+          <li>
+            <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
+              Remix Docs
+            </a>
+          </li>
+        </ul>
+      </Box>
     </div>
   );
 }

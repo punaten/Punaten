@@ -5,6 +5,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { UIProvider } from "@yamada-ui/react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,5 +26,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <UIProvider>
+      <Outlet />
+    </UIProvider>
+  );
 }
