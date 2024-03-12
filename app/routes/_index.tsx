@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { Box } from "@yamada-ui/react";
+import HelloWasm from "~/components/HelloWasm";
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -31,6 +32,7 @@ export default function Index() {
             </a>
           </li>
         </ul>
+        <HelloWasm />
       </Box>
     </div>
   );

@@ -46,3 +46,20 @@ npm run deploy
 ```
 
 [bindings]: https://developers.cloudflare.com/pages/functions/bindings/
+
+Docker イメージのビルド
+```sh
+docker build -t remix-wasm .
+```
+
+Docker コンテナの起動
+
+```sh
+docker run -it --rm -v ${PWD}:/app -p 3000:3000 -p 8000:8000 remix-wasm
+```
+
+コンパイル
+
+```sh
+emcc app/wasm/hello.c -o app/wasm/hello.html
+```
