@@ -5,30 +5,11 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 
 export const usePoseDetector = (
   videoRef: React.RefObject<HTMLVideoElement>,
-  canvasRef: React.RefObject<HTMLCanvasElement>
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  isCameraOn: boolean
 ) => {
   const [detector, setDetector] = useState<posedetection.PoseDetector | null>(null);
-  const [isCameraOn, setIsCameraOn] = useState(false);
   const [isDetectionOn, setIsDetectionOn] = useState(false);
-
-  const startCamera = useCallback(async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setIsCameraOn(true);
-      }
-    }
-  }, [videoRef]);
-
-  const stopCamera = useCallback(() => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach((track) => track.stop());
-      setIsCameraOn(false);
-    }
-  }, [videoRef]);
 
   const initDetector = useCallback(async () => {
     await tf.ready();
@@ -78,20 +59,15 @@ export const usePoseDetector = (
   }, [canvasRef, videoRef]);
 
   const detectPoses = useCallback(async () => {
-    if (isDetectionOn && detector && videoRef.current && canvasRef.current) {
-      const poses = await detector.estimatePoses(videoRef.current, {flipHorizontal: false});
+    let poses: posedetection.Pose[] | undefined;
+    if (isDetectionOn && isCameraOn && detector && videoRef.current && canvasRef.current) {
+      poses = await detector.estimatePoses(videoRef.current, { flipHorizontal: false });
+      console.log(poses);
       drawResult(poses);
     }
     requestAnimationFrame(detectPoses);
-  }, [isDetectionOn, detector, videoRef, canvasRef, drawResult]);
+    return poses;
+  }, [isDetectionOn, isCameraOn, detector, videoRef, canvasRef, drawResult]);
 
-  useEffect(() => {
-    if (isCameraOn) {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-  }, [isCameraOn, startCamera, stopCamera]);
-
-  return { detector, detectPoses, isCameraOn, setIsCameraOn, isDetectionOn, setIsDetectionOn };
+  return { detector, detectPoses, isDetectionOn, setIsDetectionOn };
 };

@@ -1,4 +1,5 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
+import { Link } from "@remix-run/react";
 import { Box } from "@yamada-ui/react";
 import HelloWasm from "~/components/HelloWasm";
 import PoseDetection from "~/components/detection/PoseDetection";
@@ -31,6 +32,9 @@ export default function Index() {
             <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
               Remix Docs
             </a>
+          </li>
+          <li>
+            <Link to={'/createLearnData'}>createLearnData</Link>
           </li>
         </ul>
         <HelloWasm />

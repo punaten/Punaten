@@ -1,14 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useCamera } from './useCamera';
 import { usePoseDetector } from './usePoseDetector';
 
 const PoseDetection: React.FC = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { startCamera, stopCamera } = useCamera(videoRef);
-    const { detector, detectPoses, isDetectionOn, setIsDetectionOn } = usePoseDetector(videoRef, canvasRef);
-
-    const [isCameraOn, setIsCameraOn] = useState(true);
+    const { startCamera, stopCamera, isCameraOn } = useCamera(videoRef);
+    const { detector, detectPoses, isDetectionOn, setIsDetectionOn } = usePoseDetector(videoRef, canvasRef, isCameraOn);
 
     const toggleCamera = () => {
         if (isCameraOn) {
@@ -16,7 +14,6 @@ const PoseDetection: React.FC = () => {
         } else {
             startCamera();
         }
-        setIsCameraOn(!isCameraOn);
     };
 
     const toggleDetection = () => {
