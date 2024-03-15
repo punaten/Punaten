@@ -26,6 +26,7 @@ const DownloadDetection: React.FC = () => {
 
     const handleStartDetection = async () => {
         if (videoRef.current && detector && isDetectionOn) {
+            setPoseData([]);
             videoRef.current.play();
             const totalFrames = Math.floor((videoRef.current.duration || 0) * 30); // 30fpsを仮定
             let currentFrame = 0;
@@ -50,6 +51,7 @@ const DownloadDetection: React.FC = () => {
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPoseData([]);
         const files = event.target.files;
         if (files && files.length > 0) {
             setVideoFile(files[0]);

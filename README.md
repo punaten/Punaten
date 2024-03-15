@@ -63,3 +63,6 @@ docker run -it --rm -v ${PWD}:/app -p 3000:3000 -p 8000:8000 remix-wasm
 ```sh
 emcc app/wasm/hello.c -o app/wasm/hello.html
 ```
+
+利用した推論モデル
+https://github.com/tensorflow/tfjs-models/blob/master/pose-detection/src/movenet/README.md
