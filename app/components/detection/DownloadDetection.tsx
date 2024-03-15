@@ -19,7 +19,7 @@ const DownloadDetection: React.FC = () => {
                 setIsDetectionOn(true);
             };
             videoRef.current.onended = () => {
-                setIsDetectionOn(false);
+                // setIsDetectionOn(false);
             };
         }
     }, [videoFile, setIsDetectionOn]);
@@ -27,12 +27,12 @@ const DownloadDetection: React.FC = () => {
     const handleStartDetection = async () => {
         if (videoRef.current && detector && isDetectionOn) {
             videoRef.current.play();
-            const totalFrames = Math.floor(videoRef.current.duration * 30); // 30fpsを仮定
+            const totalFrames = Math.floor((videoRef.current.duration || 0) * 30); // 30fpsを仮定
             let currentFrame = 0;
-    
+
             const detect = async () => {
                 if (currentFrame >= totalFrames || videoRef.current?.ended) {
-                    setIsDetectionOn(false);
+                    // setIsDetectionOn(false);
                     return;
                 }
                 // ビデオのフレームが利用可能になるのを待つ
@@ -48,7 +48,6 @@ const DownloadDetection: React.FC = () => {
             detect();
         }
     };
-    
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -56,6 +55,17 @@ const DownloadDetection: React.FC = () => {
             setVideoFile(files[0]);
             setProgress(0);
             setPoseData([]);
+            setIsDetectionOn(false);
+        }
+    };
+
+    const handleRemoveVideo = () => {
+        setVideoFile(null);
+        setProgress(0);
+        setPoseData([]);
+        setIsDetectionOn(false);
+        if (videoRef.current) {
+            videoRef.current.src = '';
         }
     };
 
@@ -74,6 +84,7 @@ const DownloadDetection: React.FC = () => {
             <input type="file" accept="video/*" onChange={handleFileChange} />
             <button style={{ display: 'block', width: '100%' }} onClick={handleStartDetection} disabled={!videoFile || !isDetectionOn}>Start Detection</button>
             <button style={{ display: 'block', width: '100%' }} onClick={downloadPoseData} disabled={!poseData.length}>Download Pose Data</button>
+            <button style={{ display: 'block', width: '100%' }} onClick={handleRemoveVideo} disabled={!videoFile}>Remove Video</button>
             <progress value={progress} max="100"></progress>
             <video ref={videoRef} style={{ display: 'none' }} muted>
                 <track kind="captions" />
