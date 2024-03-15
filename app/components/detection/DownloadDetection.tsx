@@ -1,43 +1,66 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { usePoseDetector } from './usePoseDetector';
-import * as posedetection from '@tensorflow-models/pose-detection';
+import { Pose } from '@tensorflow-models/pose-detection/dist/types';
 
 const DownloadDetection: React.FC = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { detector, detectPoses, isDetectionOn, setIsDetectionOn } = usePoseDetector(videoRef, canvasRef, true);
-    const [posesData, setPosesData] = useState< posedetection.Pose[]>([]);
     const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [poseData, setPoseData] = useState<Pose[]>([]);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         if (videoFile && videoRef.current) {
             const videoUrl = URL.createObjectURL(videoFile);
             videoRef.current.src = videoUrl;
-            setIsDetectionOn(true);
+            videoRef.current.load();
+            videoRef.current.onloadeddata = () => {
+                setIsDetectionOn(true);
+            };
+            videoRef.current.onended = () => {
+                setIsDetectionOn(false);
+            };
         }
     }, [videoFile, setIsDetectionOn]);
 
-    useEffect(() => {
-        if (detector && isDetectionOn) {
-            const intervalId = setInterval(async () => {
+    const handleStartDetection = async () => {
+        if (videoRef.current && detector && isDetectionOn) {
+            videoRef.current.play();
+            const totalFrames = Math.floor(videoRef.current.duration * 30); // 30fpsを仮定
+            let currentFrame = 0;
+    
+            const detect = async () => {
+                if (currentFrame >= totalFrames || videoRef.current?.ended) {
+                    setIsDetectionOn(false);
+                    return;
+                }
+                // ビデオのフレームが利用可能になるのを待つ
+                await new Promise((resolve) => videoRef.current?.requestVideoFrameCallback(resolve));
                 const poses = await detectPoses();
                 if (poses) {
-                    setPosesData((prevData) => [...prevData, ...poses]);
+                    setPoseData((prevData) => [...prevData, ...poses]);
                 }
-            }, 100); // Adjust the interval as needed
-            return () => clearInterval(intervalId);
+                currentFrame++;
+                setProgress((currentFrame / totalFrames) * 100);
+                requestAnimationFrame(detect);
+            };
+            detect();
         }
-    }, [detector, isDetectionOn, detectPoses]);
+    };
+    
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
             setVideoFile(files[0]);
+            setProgress(0);
+            setPoseData([]);
         }
     };
 
-    const downloadResults = () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(posesData));
+    const downloadPoseData = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(poseData));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", "pose_data.json");
@@ -49,8 +72,10 @@ const DownloadDetection: React.FC = () => {
     return (
         <div>
             <input type="file" accept="video/*" onChange={handleFileChange} />
-            <button onClick={downloadResults}>Download Results</button>
-            <video ref={videoRef} style={{ display: 'none' }} autoPlay muted loop>
+            <button style={{ display: 'block', width: '100%' }} onClick={handleStartDetection} disabled={!videoFile || !isDetectionOn}>Start Detection</button>
+            <button style={{ display: 'block', width: '100%' }} onClick={downloadPoseData} disabled={!poseData.length}>Download Pose Data</button>
+            <progress value={progress} max="100"></progress>
+            <video ref={videoRef} style={{ display: 'none' }} muted>
                 <track kind="captions" />
             </video>
             <canvas ref={canvasRef} />

@@ -15,7 +15,7 @@ export const usePoseDetector = (
     await tf.ready();
     const model = posedetection.SupportedModels.MoveNet;
     const detectorConfig = {
-      modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+      modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
     };
     const newDetector = await posedetection.createDetector(model, detectorConfig);
     setDetector(newDetector);
@@ -59,14 +59,14 @@ export const usePoseDetector = (
   }, [canvasRef, videoRef]);
 
   const detectPoses = useCallback(async () => {
-    let poses: posedetection.Pose[] | undefined;
+    // debugger
     if (isDetectionOn && isCameraOn && detector && videoRef.current && canvasRef.current) {
-      poses = await detector.estimatePoses(videoRef.current, { flipHorizontal: false });
-      console.log(poses);
+      const poses = await detector.estimatePoses(videoRef.current, { flipHorizontal: false });
       drawResult(poses);
+      requestAnimationFrame(detectPoses);
+      return poses;  // ポーズデータを返す
     }
-    requestAnimationFrame(detectPoses);
-    return poses;
+    return null;  // 推論が行われない場合はnullを返す
   }, [isDetectionOn, isCameraOn, detector, videoRef, canvasRef, drawResult]);
 
   return { detector, detectPoses, isDetectionOn, setIsDetectionOn };
