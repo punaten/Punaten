@@ -8,6 +8,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
 # ワーキングディレクトリの設定
 WORKDIR /app
 
+# pythonのパッケージのインストール
+COPY clustering/python/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Emscripten環境の初期化
 RUN echo "source /emsdk/emsdk_env.sh" >> ~/.bashrc
 
