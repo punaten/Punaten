@@ -1,9 +1,9 @@
 # Dockerfile
 FROM emscripten/emsdk:latest
 
-# Node.jsのインストール（NodeSourceから最新のLTSバージョンをインストール）
+# Node.jsとPythonのインストール
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs python3 python3-pip
 
 # ワーキングディレクトリの設定
 WORKDIR /app
