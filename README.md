@@ -70,3 +70,5 @@ https://github.com/tensorflow/tfjs-models/blob/master/pose-detection/src/movenet
 pythonコマンド
 ```
 python3 clustering/python/main.py
+
+hello from mercy laptop
