@@ -3,6 +3,8 @@ import json
 import numpy as np
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
 
 # JSONファイルからキーポイントデータを読み込む関数
 def load_keypoints_from_json(folder_path):
@@ -22,61 +24,111 @@ def load_keypoints_from_json(folder_path):
                         all_keypoints.append(video_keypoints)
     return all_keypoints
 
-# キーポイントデータを平坦化する関数
-def flatten_keypoints(keypoints):
-    return [kp for video in keypoints for frame in video for kp in frame]
+# データクリーニング: 欠損キーポイントの補完
+def clean_data(data):
+    cleaned_data = []
+    for video_keypoints in data:
+        cleaned_video = []
+        for frame_keypoints in video_keypoints:
+            # 欠損キーポイントを平均値で補完
+            cleaned_frame = [kp if kp != [0, 0] else [np.nan, np.nan] for kp in frame_keypoints]
+            cleaned_video.append(cleaned_frame)
+        cleaned_data.append(cleaned_video)
+    return cleaned_data
 
-# キーポイントからオプティカルフローを計算する関数
+# 正規化: キーポイントデータのスケーリング
+def normalize_data(data):
+    # 全てのキーポイントを1次元配列に変換
+    all_keypoints = np.array([kp for video in data for frame in video for kp in frame]).reshape(-1, 2)
+    # MinMaxScalerを使用して[0, 1]の範囲にスケーリング
+    scaler = MinMaxScaler()
+    scaled_keypoints = scaler.fit_transform(all_keypoints)
+    # スケーリングされたキーポイントを元の形式に戻す
+    normalized_data = []
+    idx = 0
+    for video_keypoints in data:
+        normalized_video = []
+        for frame_keypoints in video_keypoints:
+            normalized_frame = [scaled_keypoints[idx + i] for i in range(len(frame_keypoints))]
+            idx += len(frame_keypoints)
+            normalized_video.append(normalized_frame)
+        normalized_data.append(normalized_video)
+    return normalized_data
+
+# オプティカルフローを計算する関数
 def calculate_optical_flow_from_keypoints(keypoints):
     optical_flows = []
     for video_keypoints in keypoints:
         video_flows = []
         for i in range(len(video_keypoints) - 1):
-            prev_keypoints = video_keypoints[i]
-            next_keypoints = video_keypoints[i + 1]
-            # キーポイントの数が一致している場合のみオプティカルフローを計算
-            if len(prev_keypoints) == len(next_keypoints):
-                flows = [np.array([nx - px, ny - py]) for (px, py), (nx, ny) in zip(prev_keypoints, next_keypoints)]
-                video_flows.append(flows)
+            prev_frame_keypoints = video_keypoints[i]
+            next_frame_keypoints = video_keypoints[i + 1]
+            # 各キーポイントの移動量（オプティカルフロー）を計算
+            flow = [np.subtract(next_kp, prev_kp) for prev_kp, next_kp in zip(prev_frame_keypoints, next_frame_keypoints)]
+            video_flows.append(flow)
         optical_flows.append(video_flows)
     return optical_flows
 
+# 特徴抽出関数
+def extract_features(optical_flows, frame_interval=20):
+    extracted_features = []
+    for video_flows in optical_flows:
+        if len(video_flows) < frame_interval:
+            # フレーム数が間隔より少ない場合はスキップ
+            continue
+        video_features = []
+        for i in range(0, len(video_flows), frame_interval):
+            # 指定したフレーム間隔で特徴を抽出
+            interval_flows = video_flows[i:i + frame_interval]
+            # 各キーポイントのオプティカルフローの平均と標準偏差を計算
+            mean_flows = np.mean(interval_flows, axis=0)
+            std_flows = np.std(interval_flows, axis=0)
+            # 平均と標準偏差を結合して特徴ベクトルを形成
+            features = np.concatenate([mean_flows.flatten(), std_flows.flatten()])
+            video_features.append(features)
 
-# キーポイントとオプティカルフローを組み合わせてクラスタリングする関数
-def perform_clustering_with_optical_flow(keypoints, optical_flows):
-    # 最初のフレームのキーポイントを削除して長さを合わせる
-    adjusted_keypoints = [video[1:] for video in keypoints]
-    flattened_keypoints = flatten_keypoints(adjusted_keypoints)
-    flattened_flows = flatten_keypoints(optical_flows)
-    features = np.hstack((flattened_keypoints, flattened_flows))
-    kmeans = KMeans(n_clusters=3, random_state=0).fit(features)
-    return kmeans
+        extracted_features.append(video_features)
+    print("extracted_features shape:", np.array(extracted_features).shape)
+    return extracted_features
 
+# 次元削減関数
+def reduce_dimensions(features, n_components=10):
+    reduced_features = []
+    pca = PCA(n_components=n_components)
+    for video_features in features:
+        # PCAを使用して特徴の次元数を削減
+        reduced_video_features = pca.fit_transform(video_features)
+        reduced_features.append(reduced_video_features)
+    return reduced_features
 
-# クラスタリング結果を保存する関数
-def save_results(kmeans, flattened_keypoints, output_dir):
-    # Save clustering result as an image
-    plt.figure(figsize=(8, 6))
-    for i, label in enumerate(kmeans.labels_):
-        plt.scatter(flattened_keypoints[i][0], flattened_keypoints[i][1], c=f'C{label}', label=f'Cluster {label}')
-    plt.title('Clustering Results')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.legend()
-    plt.savefig(os.path.join(output_dir, 'clustering_result.png'))
-    plt.close()
 
 # メイン関数
 def main(input_dir, output_dir):
+    # キーポイントデータの読み込み
     keypoints = load_keypoints_from_json(input_dir)
-    optical_flows = calculate_optical_flow_from_keypoints(keypoints)
-    kmeans = perform_clustering_with_optical_flow(keypoints, optical_flows)
-    flattened_keypoints = flatten_keypoints(keypoints)
-    save_results(kmeans, flattened_keypoints, output_dir)
+
+    # データのクリーニング
+    cleaned_keypoints = clean_data(keypoints)
+
+    # データの正規化
+    normalized_keypoints = normalize_data(cleaned_keypoints)
+
+    # オプティカルフローの計算
+    optical_flows = calculate_optical_flow_from_keypoints(normalized_keypoints)
+
+    # 特徴抽出
+    features = extract_features(optical_flows)
+
+    # 次元削減
+    reduced_data = reduce_dimensions(features)
+
+    # # クラスタリング
+    # clusters = cluster_data(reduced_data)
+
+    # # 結果の保存
+    # save_results(clusters, output_dir)
 
 if __name__ == '__main__':
-    py_dir = 'clustering/python/'
-    input_dir = py_dir + 'train'
-    output_dir = py_dir + 'output'
-    os.makedirs(output_dir, exist_ok=True)
+    input_dir = 'clustering/python/train'
+    output_dir = 'clustering/python/output'
     main(input_dir, output_dir)
