@@ -3,7 +3,7 @@ FROM emscripten/emsdk:latest
 
 # Node.jsとPythonのインストール
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-    apt-get install -y nodejs python3 python3-pip
+    apt-get install -y nodejs python3 python3-pip libgl1-mesa-glx
 
 # ワーキングディレクトリの設定
 WORKDIR /app
