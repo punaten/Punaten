@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { Center, Flex, Motion } from "@yamada-ui/react";
+import { Box, Center, Flex, Link, Motion } from "@yamada-ui/react";
+import { useState } from "react";
 import DarkModeController from "~/components/global/DarkModeController";
 export const meta: MetaFunction = () => {
   return [
@@ -17,21 +18,23 @@ export default function Index() {
       <DarkModeController />
       <Flex direction={"column"}>
         <Center>
-          <Motion
-            as="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 1 }}
-            whileFocus={{ scale: 1.05 }}
-            p="md"
-            rounded="md"
-            bg="primary"
-            color="white"
-          >
-            <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
-          </Motion>
+          <Link href="/HowToPlay">
+            <Motion
+              as="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 1 }}
+              whileFocus={{ scale: 1.05 }}
+              p="md"
+              rounded="md"
+              bg="primary"
+              color="white"
+            >
+              <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
+            </Motion>
+          </Link>
         </Center>
         <Center fontSize={48} pt={10}>
-          - Tap to Start -
+          - Click to Start -
         </Center>
       </Flex>
     </Center>
