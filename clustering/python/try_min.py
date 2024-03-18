@@ -148,6 +148,8 @@ def average_features(features):
 def cluster_features(features, n_clusters):
     # 特徴量を2次元配列に変換
     all_features = np.array([f for video in features for f in video])
+    # 特徴量を出力
+    print("Feature shape:", np.array(all_features).shape)
     # KMeansモデルの作成と学習
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     kmeans.fit(all_features)
