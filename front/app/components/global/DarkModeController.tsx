@@ -4,7 +4,7 @@ const DarkModeController = () => {
   const { colorMode, changeColorMode, toggleColorMode } = useColorMode();
 
   return (
-    <Wrap gap="md" position={"fixed"} bottom={0} padding={10}>
+    <Wrap gap="md" position={"fixed"} bottom={0} padding={10} zIndex={10}>
       <Button onClick={() => changeColorMode("light")}>ライトモード</Button>
       <Button onClick={() => changeColorMode("dark")}>ダークモード</Button>
       <Button onClick={() => changeColorMode("system")}>システム</Button>
