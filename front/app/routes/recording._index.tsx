@@ -7,12 +7,14 @@ import Webcam from "react-webcam";
 const videoConstraints = {
   width: 360,
   height: 720,
+  facingMode: "user",
 };
 
 export default function Index() {
   const [isCaptureEnable, setCaptureEnable] = useState<boolean>(false);
   const webcamRef = useRef<Webcam>(null);
   const [url, setUrl] = useState<string | null>(null);
+  const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
@@ -63,20 +65,14 @@ export default function Index() {
         type: "video/webm",
       });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      document.body.appendChild(a);
-      a.style.display = "none";
-      a.href = url;
-      a.download = "react-webcam-stream-capture.webm";
-      a.click();
-      URL.revokeObjectURL(url);
+      setCapturedVideo(url);
       setRecordedChunks([]);
     }
   }, [recordedChunks]);
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
-      <DarkModeController />
+      {/* <DarkModeController /> */}
       <SubLogo />
       <header>
         <h1>カメラアプリ</h1>
@@ -90,8 +86,12 @@ export default function Index() {
             <button onClick={() => setCaptureEnable(false)}>終了</button>
           </div>
           <div>
-            <Webcam audio={false} ref={webcamRef} />
-            {capturing ? (
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              videoConstraints={videoConstraints}
+            />
+            {capturing && !capturedVideo ? (
               <button onClick={handleStopCaptureClick}>Stop Capture</button>
             ) : (
               <button onClick={handleStartCaptureClick}>Start Capture</button>
@@ -100,6 +100,19 @@ export default function Index() {
               <button onClick={handleDownload}>Download</button>
             )}
           </div>
+
+          {capturedVideo && (
+            <video controls width="250">
+              <source src={capturedVideo} type="video/webm" />
+              <source src="/media/cc0-videos/flower.mp4" type="video/mp4" />
+              Download the
+              <a href={capturedVideo}>WEBM</a>
+              or
+              <a href="/media/cc0-videos/flower.mp4">MP4</a>
+              video.
+            </video>
+          )}
+
           <button onClick={capture}>キャプチャ</button>
         </>
       )}
