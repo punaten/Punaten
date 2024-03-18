@@ -92,7 +92,7 @@ def extract_features(optical_flows, frame_interval=20):
     return extracted_features
 
 # 次元削減関数
-def reduce_dimensions(features, n_components=10):
+def reduce_dimensions(features, n_components=2):
     reduced_features = []
     pca = PCA(n_components=n_components)
     for video_features in features:
@@ -100,6 +100,32 @@ def reduce_dimensions(features, n_components=10):
         reduced_video_features = pca.fit_transform(video_features)
         reduced_features.append(reduced_video_features)
     return reduced_features
+
+# クラスタリング関数
+def perform_clustering(features, n_clusters=4):
+    # 各ビデオの特徴を1次元配列に連結
+    all_features = np.concatenate(features, axis=0)
+    # K-Meansクラスタリングを実行
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(all_features)
+    return kmeans
+
+# 結果の保存関数
+def save_results(clusters, features, output_dir):
+    labels = clusters.labels_
+    # 特徴ベクトルの平均値を計算
+    mean_features = np.mean(features, axis=1)
+
+    # クラスタリング結果をプロットして画像として保存
+    plt.figure(figsize=(10, 8))
+    for i, label in enumerate(labels):
+        if i < len(mean_features):  # mean_featuresの範囲内であることを確認
+            plt.scatter(mean_features[i][0], mean_features[i][1], c=f'C{label}', label=f'Cluster {label}')
+    plt.title('Clustering Results')
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
+    plt.legend()
+    plt.savefig(f'{output_dir}/clustering_result.png')
+    plt.close()
 
 
 # メイン関数
@@ -122,11 +148,27 @@ def main(input_dir, output_dir):
     # 次元削減
     reduced_data = reduce_dimensions(features)
 
-    # # クラスタリング
-    # clusters = cluster_data(reduced_data)
+    # クラスタリング
+    clusters = perform_clustering(reduced_data)
 
-    # # 結果の保存
-    # save_results(clusters, output_dir)
+    # clustersとfeaturesを標準出力
+    print("clusters:", np.array(clusters).shape)
+    # KMeansオブジェクトの属性を出力
+    print("クラスタ中心 (Centroids):")
+    print(clusters.cluster_centers_)
+
+    print("\n各データポイントのクラスタラベル (Labels):")
+    print(clusters.labels_)
+
+    print("\nクラスタ内誤差平方和 (Inertia):")
+    print(clusters.inertia_)
+
+    print("\n繰り返し回数 (Number of Iterations):")
+    print(clusters.n_iter_)
+    print("features:", np.array(features).shape)
+
+    # 結果の保存
+    save_results(clusters, features, output_dir)
 
 if __name__ == '__main__':
     input_dir = 'clustering/python/train'
