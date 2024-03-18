@@ -15,7 +15,7 @@ export const usePoseDetector = (
     await tf.ready();
     const model = posedetection.SupportedModels.MoveNet;
     const detectorConfig = {
-      modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelType: posedetection.movenet.modelType.MULTIPOSE_LIGHTNING,
     };
     const newDetector = await posedetection.createDetector(model, detectorConfig);
     setDetector(newDetector);
