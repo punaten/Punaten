@@ -11,11 +11,12 @@ const videoConstraints = {
 };
 
 export default function Index() {
-  const videoLength = 6;
+  const videoLength = 6000;
   const setNum = 3;
 
   const webcamRef = useRef<Webcam>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
+  const [counter, setCount] = useState<number>(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [capturing, setCapturing] = useState<boolean>(false);
@@ -65,6 +66,20 @@ export default function Index() {
     }
   }, [recordedChunks]);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setCount((c) => c + 100);
+    }, 100);
+    if (counter >= videoLength) {
+      console.log("send the video");
+      setCount(0);
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [counter]);
+
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
       <DarkModeController />
@@ -97,6 +112,8 @@ export default function Index() {
           video.
         </video>
       )}
+
+      {counter}
     </Center>
   );
 }
