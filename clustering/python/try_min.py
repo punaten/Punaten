@@ -136,6 +136,13 @@ def resample_features(features, target_length = 40):
         resampled_features.append(resampled_video_features)
     return resampled_features
 
+# ビデオ全体の特徴量を平均化
+def average_features(features):
+    averaged_features = []
+    for video_features in features:
+        avg_feature = np.mean(video_features, axis=0)
+        averaged_features.append(avg_feature)
+    return averaged_features
 
 # KMeansでクラスタリング
 def cluster_features(features, n_clusters):
@@ -187,6 +194,11 @@ def plot_clusters_with_labels(features, labels, class_labels, output_dir):
 def main(input_dir, output_dir):
    # キーポイントデータの読み込み
     keypoints, labels = load_keypoints_from_json(input_dir)
+    # print("keypoints:", keypoints)
+    # with open('clustering/python/output/keypoints.txt', 'w') as f:
+    #     for item in keypoints:
+    #         f.write("%s\n" % item)
+
     print("labels:", labels)
     # データのクリーニング
     cleaned_keypoints = clean_data(keypoints)
@@ -216,12 +228,15 @@ def main(input_dir, output_dir):
     # resampled_features = resample_features(final_features, target_length)
 
     # features = extract_features(optical_flows)
-    labels = cluster_features(final_features, n_clusters=5)
-    video_labels = assign_labels_to_videos(final_features, labels)
-    class_labels = get_class_labels(input_dir)
-    accuracy = calculate_accuracy(class_labels, video_labels)
-    print(f"Accuracy: {accuracy}")
-    plot_clusters_with_labels(final_features, labels, class_labels, output_dir)
+    averaged_features = average_features(final_features)
+    labels = cluster_features([averaged_features], n_clusters=3)  # リストのリストとして渡す
+    plot_clusters_with_labels([averaged_features], labels, labels, output_dir)  # リストのリストとして渡す
+    # labels = cluster_features(final_features, n_clusters=5)
+    # video_labels = assign_labels_to_videos(final_features, labels)
+    # class_labels = get_class_labels(input_dir)
+    # accuracy = calculate_accuracy(class_labels, video_labels)
+    # print(f"Accuracy: {accuracy}")
+    # plot_clusters_with_labels(final_features, labels, class_labels, output_dir)
 
 if __name__ == '__main__':
     input_dir = 'clustering/python/train/production'
