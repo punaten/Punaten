@@ -3,6 +3,7 @@ import SubLogo from "~/components/global/SubLogo";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import DarkModeController from "~/components/global/DarkModeController";
+import CircleTimerProgress from "~/components/recording/CircleTimerProgress";
 
 const videoConstraints = {
   width: 360,
@@ -11,7 +12,7 @@ const videoConstraints = {
 };
 
 export default function Index() {
-  const videoLength = 3000;
+  const videoLength = 6000;
   const setNum = 3;
 
   const webcamRef = useRef<Webcam>(null);
@@ -95,8 +96,8 @@ export default function Index() {
         clearTimeout(timeoutId);
       };
     }
-    // }, [timeCounter, capturing]);
-  }, []);
+  }, [timeCounter, capturing]);
+  // }, []);
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
@@ -131,6 +132,7 @@ export default function Index() {
           video.
         </video>
       )}
+      <CircleTimerProgress value={(timeCounter / videoLength) * 100} />
 
       {capturing && (
         <Box>
