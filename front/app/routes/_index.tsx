@@ -1,6 +1,5 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { Box, Center, Flex, Link, Motion } from "@yamada-ui/react";
-import { useState } from "react";
+import { Center, Flex, Link, Motion } from "@yamada-ui/react";
 import DarkModeController from "~/components/global/DarkModeController";
 export const meta: MetaFunction = () => {
   return [
