@@ -9,10 +9,23 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 from collections import Counter
+from scipy.interpolate import interp1d
+from sklearn.metrics import accuracy_score
 
 HAND_KEYPOINTS = [5, 6, 7, 8, 9, 10]  # 例: 手のキーポイント
 LEG_KEYPOINTS = [11, 12, 13, 14, 15, 16]      # 例: 足のキーポイント
 TORSO_KEYPOINTS = [1, 2, 3, 4] # 例: 体幹のキーポイント
+
+# クラスラベルの取得
+def get_class_labels(folder_path):
+    class_labels = []
+    for class_name in os.listdir(folder_path):
+        class_dir = os.path.join(folder_path, class_name)
+        if os.path.isdir(class_dir):
+            for filename in os.listdir(class_dir):
+                if filename.endswith('.json'):
+                    class_labels.append(class_name)
+    return class_labels
 
 # JSONファイルからキーポイントデータを読み込む関数
 def load_keypoints_from_json(folder_path):
@@ -98,6 +111,31 @@ def extract_features_for_parts(optical_flows):
         features.append(video_features)
     return features
 
+# 特徴量のリサンプリング
+def resample_features(features, target_length = 40):
+    resampled_features = []
+    for video_features in features:
+        # 現在のフレーム数
+        current_length = len(video_features)
+        # リサンプリングが必要な場合
+        if current_length != target_length:
+            # 時間軸を作成
+            time_axis = np.linspace(0, 1, current_length)
+            target_time_axis = np.linspace(0, 1, target_length)
+            # 各特徴量に対して線形補間を行い、リサンプリング
+            resampled_video_features = []
+            for i in range(len(video_features[0])):
+                interpolator = interp1d(time_axis, [feature[i] for feature in video_features], kind='linear')
+                resampled_feature = interpolator(target_time_axis)
+                resampled_video_features.append(resampled_feature)
+            # 転置して元の形状に戻す
+            resampled_video_features = np.transpose(resampled_video_features)
+        else:
+            resampled_video_features = video_features
+        resampled_features.append(resampled_video_features)
+    return resampled_features
+
+
 # KMeansでクラスタリング
 def cluster_features(features, n_clusters):
     # 特徴量を2次元配列に変換
@@ -111,15 +149,36 @@ def cluster_features(features, n_clusters):
     print(f"Total data points: {len(labels)}")
     return labels
 
+# 正誤率の計算
+def calculate_accuracy(true_labels, predicted_labels):
+    accuracy = accuracy_score(true_labels, predicted_labels)
+    return accuracy
+
+# ビデオ単位でクラスタラベルを決定
+def assign_labels_to_videos(features, labels):
+    video_labels = []
+    start_idx = 0
+    for video_features in features:
+        end_idx = start_idx + len(video_features)
+        video_cluster_labels = labels[start_idx:end_idx]
+        # 最も頻繁に割り当てられたラベルをビデオのラベルとする
+        most_common_label = Counter(video_cluster_labels).most_common(1)[0][0]
+        video_labels.append(most_common_label)
+        start_idx = end_idx
+    return video_labels
+
 # 結果をプロット
-def plot_clusters(features, labels, output_dir):
+def plot_clusters_with_labels(features, labels, class_labels, output_dir):
     all_features = np.array([f for video in features for f in video])
-    plt.scatter(all_features[:, 0], all_features[:, 1], c=labels)
+    plt.scatter(all_features[:, 0], all_features[:, 1], c=labels, cmap='viridis')
+    for i, txt in enumerate(class_labels):
+        plt.annotate(txt, (all_features[i, 0], all_features[i, 1]))
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
-    plt.title('Clustering Results')
+    plt.title('Clustering Results with Class Labels')
     plt.savefig(f'{output_dir}/clustering_result.png')
     plt.close()
+
 
 # メイン処理
 def main(input_dir, output_dir):
@@ -150,10 +209,16 @@ def main(input_dir, output_dir):
     # パーツごとの特徴量を結合して最終的な特徴ベクトルを作成
     final_features = [np.concatenate([hf, lf, tf], axis=1) for hf, lf, tf in zip(hand_features, leg_features, torso_features)]
 
+    # target_length = 50  # リサンプリング後のフレーム数
+    # resampled_features = resample_features(final_features, target_length)
 
     # features = extract_features(optical_flows)
     labels = cluster_features(final_features, n_clusters=5)
-    plot_clusters(final_features, labels, output_dir)
+    video_labels = assign_labels_to_videos(final_features, labels)
+    class_labels = get_class_labels(input_dir)
+    accuracy = calculate_accuracy(class_labels, video_labels)
+    print(f"Accuracy: {accuracy}")
+    plot_clusters_with_labels(final_features, labels, class_labels, output_dir)
 
 if __name__ == '__main__':
     input_dir = 'clustering/python/train/production'
