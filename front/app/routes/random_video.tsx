@@ -4,20 +4,12 @@ import React, { useEffect, useState } from 'react';
 type FileEvent = React.ChangeEvent<HTMLInputElement>;
 
 function App() {
-    const [fileSrc, setFileSrc] = useState<string[]>(["edm","Girlfriend","happy_happy","shikarareru","yonezu_happy"]);
+    const [fileSrc, setFileSrc] = useState<string[]>(["edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"]);
     const [videoSrc, setVideoSrc] = useState<string>('');
     const [backgroundSrc, setBackgroundSrc] = useState<string>('');
     const [isLoading, setLoading] = useState<boolean>(false);
     // 生成された動画のURLを保持するための新しいステート
     const [outputVideoSrc, setOutputVideoSrc] = useState<string>('');
-
-    // handleVideoFileとhandleBackgroundFile関数にFileEvent型を適用
-    const handleVideoFile = async (event: FileEvent) => {
-        const files = event.target.files;
-        if (!files || files.length === 0) return;
-        const file = files[0];
-        setVideoSrc(URL.createObjectURL(file));
-    };
 
     const handleBackgroundFile = async (event: FileEvent) => {
         const files = event.target.files;
@@ -25,12 +17,15 @@ function App() {
         const file = files[0];
         setBackgroundSrc(URL.createObjectURL(file));
     };
+
     const createChromaKeyComposite = () => {
         setLoading(true);
+        // randomにfileSrcから動画を選択
+        const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)]
+        const videoSrc = "/public/" + videoAndAudioFileName + ".mp4";
+
         const video = document.createElement('video');
         video.src = videoSrc;
-        video.muted = true;
-        video.autoplay = true;
 
         const background = new Image();
         background.src = backgroundSrc;
@@ -49,14 +44,14 @@ function App() {
             video.onloadedmetadata = async () => {
                 const audioContext = new AudioContext();
                 // オーディオファイルをArrayBufferとしてフェッチ
-                const audioData = await fetch('/public/happy_happy.mp3').then(response => response.arrayBuffer());
+                const audioData = await fetch("/public/" + videoAndAudioFileName + ".mp3").then(response => response.arrayBuffer());
                 // デコードされたオーディオデータ
                 const decodedAudioData = await audioContext.decodeAudioData(audioData);
-                
+
                 // デコードされたオーディオデータをソースとして設定
                 const audioSource = audioContext.createBufferSource();
                 audioSource.buffer = decodedAudioData;
-                
+
                 // MediaStreamAudioDestinationNodeを作成して、オーディオストリームを取得
                 const destination = audioContext.createMediaStreamDestination();
                 audioSource.connect(destination);
@@ -69,9 +64,8 @@ function App() {
                 const vidY = (canvas.height - vidHeight) / 2;
 
                 // MediaStreamの型を指定
-                const stream = canvas.captureStream(30); // 30fpsでストリームをキャプチャ
+                const stream = canvas.captureStream(20); // 30fpsでストリームをキャプチャ
                 const audioTrack = destination.stream.getAudioTracks()[0]; // 音声トラックを取得
-                console.log(audioTrack)
                 // audiotrackの音声を確認
                 audioTrack.onmute = () => {
                     console.log('audioTrack is muted');
@@ -164,19 +158,20 @@ function App() {
         };
     };
 
-    useEffect(() => {
-        if (videoSrc && backgroundSrc) {
-            createChromaKeyComposite();
+    const handleClickGenerate = () => {
+        if (!backgroundSrc){
+            alert('背景画像を選択してください');
         }
-    }, [videoSrc, backgroundSrc]);
+        createChromaKeyComposite();
+    }
 
     return (
         <div className="app">
             <h1>Chroma Key Compositing</h1>
             <div>
-                <input type="file" accept="video/*" onChange={handleVideoFile} />
                 <input type="file" accept="image/*" onChange={handleBackgroundFile} />
             </div>
+            <button onClick={handleClickGenerate}>生成</button>
             {isLoading && <p>Loading...</p>}
             {/* 生成された動画を表示するvideoタグ */}
             {outputVideoSrc && (
