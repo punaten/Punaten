@@ -12,7 +12,7 @@ from collections import Counter
 from scipy.interpolate import interp1d
 from sklearn.metrics import accuracy_score
 import datetime
-
+from joblib import dump
 HAND_KEYPOINTS = [5, 6, 7, 8, 9, 10]  # 例: 手のキーポイント
 LEG_KEYPOINTS = [11, 12, 13, 14, 15, 16]      # 例: 足のキーポイント
 TORSO_KEYPOINTS = [1, 2, 3, 4] # 例: 体幹のキーポイント
@@ -151,6 +151,8 @@ def cluster_features(features, n_clusters):
     # KMeansモデルの作成と学習
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     kmeans.fit(all_features)
+    # モデルの保存
+    dump(kmeans, 'clustering/python/output/kmeans_model.pkl')
     # 各データポイントのクラスタラベルを取得
     labels = kmeans.labels_
     # データの形状を出力
