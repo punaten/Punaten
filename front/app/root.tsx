@@ -5,7 +5,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import { UIProvider } from "@yamada-ui/react";
+import { ThemeConfig, UIProvider, extendConfig } from "@yamada-ui/react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,9 +25,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const config: ThemeConfig = {
+  initialColorMode: "system",
+};
+
+const customConfig = extendConfig(config);
+
 export default function App() {
   return (
-    <UIProvider>
+    <UIProvider config={customConfig}>
       <Outlet />
     </UIProvider>
   );
