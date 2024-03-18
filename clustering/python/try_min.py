@@ -11,6 +11,7 @@ import seaborn as sns
 from collections import Counter
 from scipy.interpolate import interp1d
 from sklearn.metrics import accuracy_score
+import datetime
 
 HAND_KEYPOINTS = [5, 6, 7, 8, 9, 10]  # 例: 手のキーポイント
 LEG_KEYPOINTS = [11, 12, 13, 14, 15, 16]      # 例: 足のキーポイント
@@ -176,7 +177,9 @@ def plot_clusters_with_labels(features, labels, class_labels, output_dir):
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
     plt.title('Clustering Results with Class Labels')
-    plt.savefig(f'{output_dir}/clustering_result.png')
+    current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+    plt.savefig(f'{output_dir}/clustering_result_{current_time}.png')
     plt.close()
 
 
