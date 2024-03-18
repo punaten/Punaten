@@ -1,4 +1,4 @@
-import { Center, Flex } from "@yamada-ui/react";
+import { Box, Center, Flex } from "@yamada-ui/react";
 import SubLogo from "~/components/global/SubLogo";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
@@ -16,7 +16,8 @@ export default function Index() {
 
   const webcamRef = useRef<Webcam>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
-  const [counter, setCount] = useState<number>(0);
+  const [timeCounter, setTimeCount] = useState<number>(0);
+  const [setCounter, setSetCount] = useState<number>(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [capturing, setCapturing] = useState<boolean>(false);
@@ -24,6 +25,9 @@ export default function Index() {
 
   const handleStartCaptureClick = useCallback(() => {
     setCapturing(true);
+    setTimeCount(0);
+    setSetCount(1);
+
     if (webcamRef.current) {
       mediaRecorderRef.current = new MediaRecorder(
         webcamRef.current.stream as MediaStream,
@@ -67,18 +71,28 @@ export default function Index() {
   }, [recordedChunks]);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCount((c) => c + 100);
-    }, 100);
-    if (counter >= videoLength) {
-      console.log("send the video");
-      setCount(0);
-    }
+    if (capturing) {
+      const timeoutId = setTimeout(() => {
+        setTimeCount((c) => c + 100);
+      }, 100);
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [counter]);
+      if (timeCounter >= videoLength) {
+        console.log("send the video");
+        setSetCount((c) => c + 1);
+        setTimeCount(0);
+      }
+
+      if (setCounter >= setNum + 1) {
+        console.log("finish the video");
+        setSetCount((c) => c + 1);
+        setCapturing(false);
+      }
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [timeCounter, capturing]);
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
@@ -113,7 +127,7 @@ export default function Index() {
         </video>
       )}
 
-      {counter}
+      {capturing && <Box>{setCounter}</Box>}
     </Center>
   );
 }
