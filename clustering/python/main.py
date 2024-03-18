@@ -5,10 +5,14 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+from collections import Counter
 
 # JSONファイルからキーポイントデータを読み込む関数
 def load_keypoints_from_json(folder_path):
     all_keypoints = []
+    all_labels = []  # 正解ラベルを保持するリスト
     for class_name in os.listdir(folder_path):
         class_dir = os.path.join(folder_path, class_name)
         if os.path.isdir(class_dir):
@@ -22,7 +26,8 @@ def load_keypoints_from_json(folder_path):
                             keypoints = [[kp['x'], kp['y']] for kp in pose['keypoints']]
                             video_keypoints.append(keypoints)
                         all_keypoints.append(video_keypoints)
-    return all_keypoints
+                        all_labels.append(class_name)  # 正解ラベルを追加
+    return all_keypoints, all_labels
 
 # データクリーニング: 欠損キーポイントの補完
 def clean_data(data):
@@ -77,11 +82,9 @@ def calculate_optical_flow_from_keypoints(keypoints):
 
     return optical_flows
 
-
 # 特徴抽出関数
 def extract_features(optical_flows, frame_interval=20):
     extracted_features = []
-    max_intervals = 0
     for video_flows in optical_flows:
         if len(video_flows) < frame_interval:
             continue
@@ -92,47 +95,47 @@ def extract_features(optical_flows, frame_interval=20):
             std_flows = np.std(interval_flows, axis=0)
             features = np.concatenate([mean_flows.flatten(), std_flows.flatten()])
             video_features.append(features)
-        extracted_features.append(video_features)
-        max_intervals = max(max_intervals, len(video_features))
-
-    # パディング処理
-    padded_features = []
-    for video_features in extracted_features:
-        padding = np.zeros((max_intervals - len(video_features), len(video_features[0])))
-        padded_video_features = np.vstack((video_features, padding))
-        padded_features.append(padded_video_features)
-
-    print("Padded extracted features shape:", np.array(padded_features).shape)
-    return padded_features
-
-
-# 次元削減関数
-def reduce_dimensions(features, n_components=2):
-    reduced_features = []
-    pca = PCA(n_components=n_components)
-    for video_features in features:
-        # PCAを使用して特徴の次元数を削減
-        reduced_video_features = pca.fit_transform(video_features)
-        reduced_features.append(reduced_video_features)
-    return reduced_features
+        # 各ビデオの特徴ベクトルを1つのベクトルに平均化
+        video_feature = np.mean(video_features, axis=0)
+        extracted_features.append(video_feature)
+    print("extracted_features shape:", np.array(extracted_features).shape)
+    return np.array(extracted_features)
 
 # クラスタリング関数
-def perform_clustering(features, n_clusters=4):
-    # 各ビデオの特徴を1次元配列に連結
-    all_features = np.concatenate(features, axis=0)
-    # K-Meansクラスタリングを実行
-    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(all_features)
-    return kmeans
+def perform_clustering(features, labels, n_clusters=4):
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(features)
+    cluster_labels = kmeans.labels_
+
+    # 各クラスタに対して最も頻繁に出現するラベルをマッピング
+    label_mapping = {}
+    for cluster in range(n_clusters):
+        cluster_indices = [i for i, label in enumerate(cluster_labels) if label == cluster]
+        cluster_labels = [labels[i] for i in cluster_indices]
+        most_common_label = Counter(cluster_labels).most_common(1)[0][0]
+        label_mapping[cluster] = most_common_label
+
+    return kmeans, label_mapping
 
 # 結果の保存関数
-def save_results(clusters, features, output_dir):
-    labels = clusters.labels_
+def save_results(clusters, features, labels, output_dir):
+    # クラスタラベルと実際のラベルを比較してconfusion matrixを作成
+    cm = confusion_matrix(labels, clusters.labels_)
+
+    # Confusion matrixをヒートマップとしてプロット
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.xlabel('Predicted Labels')
+    plt.ylabel('True Labels')
+    plt.title('Confusion Matrix')
+    plt.savefig(f'{output_dir}/confusion_matrix.png')
+    plt.close()
+
     # 特徴ベクトルの平均値を計算
     mean_features = np.mean(features, axis=1)
 
     # クラスタリング結果をプロットして画像として保存
     plt.figure(figsize=(10, 8))
-    for i, label in enumerate(labels):
+    for i, label in enumerate(clusters.labels_):
         if i < len(mean_features):  # mean_featuresの範囲内であることを確認
             plt.scatter(mean_features[i][0], mean_features[i][1], c=f'C{label}', label=f'Cluster {label}')
     plt.title('Clustering Results')
@@ -146,7 +149,8 @@ def save_results(clusters, features, output_dir):
 # メイン関数
 def main(input_dir, output_dir):
     # キーポイントデータの読み込み
-    keypoints = load_keypoints_from_json(input_dir)
+    keypoints, labels = load_keypoints_from_json(input_dir)
+    print("labels:", labels)
 
     # データのクリーニング
     cleaned_keypoints = clean_data(keypoints)
@@ -168,14 +172,11 @@ def main(input_dir, output_dir):
     # 特徴抽出
     features = extract_features(optical_flows, 5)
 
-    # 次元削減
-    reduced_data = reduce_dimensions(features)
-    print("Reduced data shape:", np.array(reduced_data).shape)
-
     # クラスタリング
-    clusters = perform_clustering(reduced_data)
+    clusters, label_mapping = perform_clustering(features, labels, 4)
 
     # KMeansオブジェクトの属性を出力
+    print("labels:", label_mapping)
     print("クラスタ中心 (Centroids):")
     print(clusters.cluster_centers_)
 
@@ -190,9 +191,9 @@ def main(input_dir, output_dir):
     print("features:", np.array(features).shape)
 
     # 結果の保存
-    save_results(clusters, features, output_dir)
+    save_results(clusters, features, label_mapping, output_dir)
 
 if __name__ == '__main__':
-    input_dir = 'clustering/python/train'
+    input_dir = 'clustering/python/train/production'
     output_dir = 'clustering/python/output'
     main(input_dir, output_dir)
