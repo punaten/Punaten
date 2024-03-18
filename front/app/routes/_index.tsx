@@ -1,45 +1,41 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { Link } from "@remix-run/react";
-import { Box } from "@yamada-ui/react";
-import HelloWasm from "~/components/HelloWasm";
-import PoseDetection from "~/components/detection/PoseDetection";
+import { Center, Flex, Link, Motion } from "@yamada-ui/react";
+import DarkModeController from "~/components/global/DarkModeController";
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
+    { title: "ダンスDE猫ミーム" },
     {
       name: "description",
-      content: "Welcome to Remix! Using Vite and Cloudflare!",
+      content: "ダンスを踊って猫ミームを自動生成するサイトです。",
     },
   ];
 };
 
 export default function Index() {
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <Box w="full" h="100dvh" bgGradient="linear(to-r, purple.500, blue.400)" >
-        <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
-        <ul>
-          <li>
-            <a
-              target="_blank"
-              href="https://developers.cloudflare.com/pages/framework-guides/deploy-a-remix-site/"
-              rel="noreferrer"
+    <Center h={"full"}>
+      <DarkModeController />
+      <Flex direction={"column"}>
+        <Center>
+          <Link href="/HowToPlay">
+            <Motion
+              as="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 1 }}
+              whileFocus={{ scale: 1.05 }}
+              p="md"
+              rounded="md"
+              bg="primary"
+              color="white"
             >
-              Cloudflare Pages Docs - Remix guide
-            </a>
-          </li>
-          <li>
-            <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-              Remix Docs
-            </a>
-          </li>
-          <li>
-            <Link to={'/createLearnData'}>createLearnData</Link>
-          </li>
-        </ul>
-        <HelloWasm />
-        <PoseDetection />
-      </Box>
-    </div>
+              <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
+            </Motion>
+          </Link>
+        </Center>
+        <Center fontSize={48} pt={10}>
+          - Click to Start -
+        </Center>
+      </Flex>
+    </Center>
   );
 }

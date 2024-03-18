@@ -72,3 +72,7 @@ pythonコマンド
 python3 clustering/python/main.py
 
 hello from mercy laptop
+
+### DeploymentPages
+
+- 骨格推定 -> `/detection`
