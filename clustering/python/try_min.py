@@ -81,76 +81,54 @@ def calculate_optical_flow_from_keypoints(keypoints):
     for i, video in enumerate(optical_flows):
         print(f"Video {i + 1}: {len(video)} flows, {len(video[0]) if video else 0} flow vectors per frame")
 
-    return optical_flows
+    return optical_flows 
 
-# 特徴抽出関数
-def extract_features(optical_flows, frame_interval=20):
-    extracted_features = []
+# 特徴量抽出
+def extract_features(optical_flows):
+    features = []
     for video_flows in optical_flows:
-        if len(video_flows) < frame_interval:
-            continue
         video_features = []
-        for i in range(0, len(video_flows), frame_interval):
-            interval_flows = video_flows[i:i + frame_interval]
-            # 各フレームのオプティカルフローの平均と標準偏差を計算
-            frame_features = []
-            for flow in np.transpose(interval_flows, (1, 0, 2)):
-                mean_flow = np.mean(flow, axis=0)
-                std_flow = np.std(flow, axis=0)
-                frame_features.append(np.concatenate([mean_flow, std_flow]))
-            video_features.append(frame_features)
-        extracted_features.append(video_features)
+        for flow in video_flows:
+            # 特徴量としてフローベクトルの平均を使用
+            avg_flow = np.mean(flow, axis=0)
+            video_features.append(avg_flow)
+        features.append(video_features)
+    # データの形状と型を出力
+    print(f"Total videos: {len(features)}")
+    for i, video_features in enumerate(features):
+        print(f"Video {i + 1}: {len(video_features)} features, Type: {type(video_features)}")
+        if video_features:
+            first_feature = video_features[0]
+            print(f"Type of first feature in Video {i + 1}: {type(first_feature)}, Shape: {first_feature.shape}, Dtype: {first_feature.dtype}")
+    print(f"Type of features: {type(features)}")
+    return features
 
-    print("extracted_features shape:", np.array(extracted_features).shape)
-    return extracted_features
+# KMeansでクラスタリング
+def cluster_features(features, n_clusters):
+    # 特徴量を2次元配列に変換
+    all_features = np.array([f for video in features for f in video])
+    # KMeansモデルの作成と学習
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    kmeans.fit(all_features)
+    # 各データポイントのクラスタラベルを取得
+    labels = kmeans.labels_
+    # データの形状を出力
+    print(f"Total data points: {len(labels)}")
+    return labels
 
-# 次元削減関数
-def reduce_dimensions(features, n_components=2):
-    reduced_features = []
-    for video_features in features:
-        # 各ビデオに対してPCAを適用し、2次元に削減
-        video_data = np.array(video_features)
-        pca = PCA(n_components=n_components)
-        reduced_video_features = pca.fit_transform(video_data)
-        reduced_features.append(reduced_video_features)
-    return np.array(reduced_features)
-
-# クラスタリング関数
-def perform_clustering(features, labels, n_clusters=4):
-    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(features)
-    cluster_labels = kmeans.labels_
-
-    # 適切な評価指標を計算する (例: Adjusted Rand Index)
-    ari = adjusted_rand_score(labels, cluster_labels)
-    print(f"Adjusted Rand Index: {ari:.3f}")
-
-    return kmeans, ari
-
-# 結果の保存関数
-def save_results(clusters, reduced_features, labels, output_dir):
-    # クラスタリング結果をプロットして画像として保存
-    plt.figure(figsize=(10, 8))
-    for i, label in enumerate(clusters.labels_):
-        plt.scatter(reduced_features[i, 0], reduced_features[i, 1], c=f'C{label}', label=f'Cluster {label}')
-    plt.title('Clustering Results')
+# 結果をプロット
+def plot_clusters(features, labels, output_dir):
+    all_features = np.array([f for video in features for f in video])
+    plt.scatter(all_features[:, 0], all_features[:, 1], c=labels)
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
-    plt.legend()
+    plt.title('Clustering Results')
     plt.savefig(f'{output_dir}/clustering_result.png')
     plt.close()
 
-    # 混同行列を計算して表示
-    conf_matrix = confusion_matrix(labels, clusters.labels_)
-    sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='g')
-    plt.xlabel('Predicted labels')
-    plt.ylabel('True labels')
-    plt.title('Confusion Matrix')
-    plt.savefig(f'{output_dir}/confusion_matrix.png')
-    plt.close()
-
-# メイン関数
+# メイン処理
 def main(input_dir, output_dir):
-    # キーポイントデータの読み込み
+   # キーポイントデータの読み込み
     keypoints, labels = load_keypoints_from_json(input_dir)
     print("labels:", labels)
 
@@ -171,34 +149,12 @@ def main(input_dir, output_dir):
     # オプティカルフローの計算
     optical_flows = calculate_optical_flow_from_keypoints(normalized_keypoints)
 
-    # 特徴抽出
-    features = extract_features(optical_flows, 5)
-
-    # 次元削減
-    reduced_features = reduce_dimensions(features, n_components=2)
-
-    # クラスタリング
-    clusters, ari = perform_clustering(reduced_features, labels, 4)
-    print(f"Clustering Adjusted Rand Index: {ari:.3f}")
-
-    # KMeansオブジェクトの属性を出力
-    print("クラスタ中心 (Centroids):")
-    print(clusters.cluster_centers_)
-
-    print("\n各データポイントのクラスタラベル (Labels):")
-    print(clusters.labels_)
-
-    print("\nクラスタ内誤差平方和 (Inertia):")
-    print(clusters.inertia_)
-
-    print("\n繰り返し回数 (Number of Iterations):")
-    print(clusters.n_iter_)
-    print("features:", np.array(features).shape)
-
-   # 結果の保存
-    save_results(clusters, reduced_features, labels, output_dir)
+    features = extract_features(optical_flows)
+    labels = cluster_features(features, n_clusters=5)
+    plot_clusters(features, labels, output_dir)
 
 if __name__ == '__main__':
     input_dir = 'clustering/python/train/production'
     output_dir = 'clustering/python/output'
+
     main(input_dir, output_dir)
