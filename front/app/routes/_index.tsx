@@ -1,9 +1,9 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 import {
-  Box,
   Button,
   Center,
   Flex,
+  Motion,
   Wrap,
   useColorMode,
 } from "@yamada-ui/react";
@@ -19,6 +19,7 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const { colorMode, changeColorMode, toggleColorMode } = useColorMode();
+
   return (
     <Center h={"full"}>
       <Wrap gap="md" position={"fixed"} bottom={0} padding={10}>
@@ -30,7 +31,20 @@ export default function Index() {
         </Button>
       </Wrap>
       <Flex direction={"column"}>
-        <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
+        <Center>
+          <Motion
+            as="button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 1 }}
+            whileFocus={{ scale: 1.05 }}
+            p="md"
+            rounded="md"
+            bg="primary"
+            color="white"
+          >
+            <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
+          </Motion>
+        </Center>
         <Center fontSize={48} pt={10}>
           - Tap to Start -
         </Center>
