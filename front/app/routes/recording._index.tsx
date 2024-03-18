@@ -11,7 +11,7 @@ const videoConstraints = {
 };
 
 export default function Index() {
-  const videoLength = 6000;
+  const videoLength = 3000;
   const setNum = 3;
 
   const webcamRef = useRef<Webcam>(null);
@@ -25,9 +25,6 @@ export default function Index() {
 
   const handleStartCaptureClick = useCallback(() => {
     setCapturing(true);
-    setTimeCount(0);
-    setSetCount(1);
-
     if (webcamRef.current) {
       mediaRecorderRef.current = new MediaRecorder(
         webcamRef.current.stream as MediaStream,
@@ -41,6 +38,12 @@ export default function Index() {
       );
       mediaRecorderRef.current.start();
     }
+  }, [webcamRef, setCapturing, mediaRecorderRef]);
+
+  const handleStartTimerClick = useCallback(() => {
+    setCapturing(true);
+    setTimeCount(0);
+    setSetCount(1);
   }, [webcamRef, setCapturing, mediaRecorderRef]);
 
   const handleDataAvailable = useCallback(
@@ -92,7 +95,8 @@ export default function Index() {
         clearTimeout(timeoutId);
       };
     }
-  }, [timeCounter, capturing]);
+    // }, [timeCounter, capturing]);
+  }, []);
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
@@ -110,6 +114,7 @@ export default function Index() {
         ) : (
           <button onClick={handleStartCaptureClick}>Start</button>
         )}
+        <button onClick={handleStartTimerClick}>Timer</button>
         {recordedChunks.length > 0 && (
           <button onClick={handleDownload}>Download</button>
         )}
@@ -127,7 +132,11 @@ export default function Index() {
         </video>
       )}
 
-      {capturing && <Box>{setCounter}</Box>}
+      {capturing && (
+        <Box>
+          {setCounter}:{timeCounter}
+        </Box>
+      )}
     </Center>
   );
 }
