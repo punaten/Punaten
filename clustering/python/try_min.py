@@ -10,6 +10,10 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 from collections import Counter
 
+HAND_KEYPOINTS = [5, 6, 7, 8, 9, 10]  # 例: 手のキーポイント
+LEG_KEYPOINTS = [11, 12, 13, 14, 15, 16]      # 例: 足のキーポイント
+TORSO_KEYPOINTS = [1, 2, 3, 4] # 例: 体幹のキーポイント
+
 # JSONファイルからキーポイントデータを読み込む関数
 def load_keypoints_from_json(folder_path):
     all_keypoints = []
@@ -65,42 +69,33 @@ def normalize_data(data):
         normalized_data.append(normalized_video)
     return normalized_data
 
-def calculate_optical_flow_from_keypoints(keypoints):
-    print("calculate_optical_flow_from_keypoints")
+# パーツごとのオプティカルフローの計算
+def calculate_optical_flow_for_parts(keypoints, part_indices):
     optical_flows = []
     for video_keypoints in keypoints:
         video_flows = []
         for i in range(len(video_keypoints) - 1):
             prev_frame_keypoints = video_keypoints[i]
             next_frame_keypoints = video_keypoints[i + 1]
-            flow = [np.subtract(next_kp, prev_kp) for prev_kp, next_kp in zip(prev_frame_keypoints, next_frame_keypoints)]
+            flow = [np.subtract(next_frame_keypoints[j], prev_frame_keypoints[j]) for j in part_indices]
             video_flows.append(flow)
         optical_flows.append(video_flows)
-
-    # データの形状を出力
-    for i, video in enumerate(optical_flows):
-        print(f"Video {i + 1}: {len(video)} flows, {len(video[0]) if video else 0} flow vectors per frame")
-
-    return optical_flows 
+    return optical_flows
 
 # 特徴量抽出
-def extract_features(optical_flows):
+def extract_features_for_parts(optical_flows):
     features = []
     for video_flows in optical_flows:
         video_features = []
         for flow in video_flows:
-            # 特徴量としてフローベクトルの平均を使用
-            avg_flow = np.mean(flow, axis=0)
-            video_features.append(avg_flow)
+            # 特徴量として平均、標準偏差、最大値、最小値を使用
+            mean_flow = np.mean(flow, axis=0)
+            std_flow = np.std(flow, axis=0)
+            max_flow = np.max(flow, axis=0)
+            min_flow = np.min(flow, axis=0)
+            feature = np.concatenate([mean_flow, std_flow, max_flow, min_flow])
+            video_features.append(feature)
         features.append(video_features)
-    # データの形状と型を出力
-    print(f"Total videos: {len(features)}")
-    for i, video_features in enumerate(features):
-        print(f"Video {i + 1}: {len(video_features)} features, Type: {type(video_features)}")
-        if video_features:
-            first_feature = video_features[0]
-            print(f"Type of first feature in Video {i + 1}: {type(first_feature)}, Shape: {first_feature.shape}, Dtype: {first_feature.dtype}")
-    print(f"Type of features: {type(features)}")
     return features
 
 # KMeansでクラスタリング
@@ -131,27 +126,34 @@ def main(input_dir, output_dir):
    # キーポイントデータの読み込み
     keypoints, labels = load_keypoints_from_json(input_dir)
     print("labels:", labels)
-
     # データのクリーニング
     cleaned_keypoints = clean_data(keypoints)
-    # print("cleaned_keypoints shape:", cleaned_keypoints)
-
     # データの正規化
     normalized_keypoints = normalize_data(cleaned_keypoints)
     for i, video_keypoints in enumerate(normalized_keypoints):
         num_frames = len(video_keypoints)
         num_keypoints = len(video_keypoints[0]) if num_frames > 0 else 0
         print(f"Video {i+1}: {num_frames} frames, {num_keypoints} keypoints per frame")
-        # print("First frame keypoints:")
-        # print(video_keypoints[0])  # 最初のフレームのキーポイントを表示
         print("----------")
 
     # オプティカルフローの計算
-    optical_flows = calculate_optical_flow_from_keypoints(normalized_keypoints)
+    # パーツごとのオプティカルフローの計算
+    hand_flows = calculate_optical_flow_for_parts(normalized_keypoints, HAND_KEYPOINTS)
+    leg_flows = calculate_optical_flow_for_parts(normalized_keypoints, LEG_KEYPOINTS)
+    torso_flows = calculate_optical_flow_for_parts(normalized_keypoints, TORSO_KEYPOINTS)
 
-    features = extract_features(optical_flows)
-    labels = cluster_features(features, n_clusters=5)
-    plot_clusters(features, labels, output_dir)
+    # パーツごとの特徴量抽出
+    hand_features = extract_features_for_parts(hand_flows)
+    leg_features = extract_features_for_parts(leg_flows)
+    torso_features = extract_features_for_parts(torso_flows)
+
+    # パーツごとの特徴量を結合して最終的な特徴ベクトルを作成
+    final_features = [np.concatenate([hf, lf, tf], axis=1) for hf, lf, tf in zip(hand_features, leg_features, torso_features)]
+
+
+    # features = extract_features(optical_flows)
+    labels = cluster_features(final_features, n_clusters=5)
+    plot_clusters(final_features, labels, output_dir)
 
 if __name__ == '__main__':
     input_dir = 'clustering/python/train/production'
