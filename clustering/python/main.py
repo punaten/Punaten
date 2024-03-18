@@ -34,6 +34,10 @@ def clean_data(data):
             cleaned_frame = [kp if kp != [0, 0] else [np.nan, np.nan] for kp in frame_keypoints]
             cleaned_video.append(cleaned_frame)
         cleaned_data.append(cleaned_video)
+    for i, video_keypoints in enumerate(cleaned_data):
+        num_frames = len(video_keypoints)
+        num_keypoints = len(video_keypoints[0]) if num_frames > 0 else 0
+        print(f"Video {i+1}: {num_frames} frames, {num_keypoints} keypoints per frame")
     return cleaned_data
 
 # 正規化: キーポイントデータのスケーリング
@@ -55,41 +59,52 @@ def normalize_data(data):
         normalized_data.append(normalized_video)
     return normalized_data
 
-# オプティカルフローを計算する関数
 def calculate_optical_flow_from_keypoints(keypoints):
+    print("calculate_optical_flow_from_keypoints")
     optical_flows = []
     for video_keypoints in keypoints:
         video_flows = []
         for i in range(len(video_keypoints) - 1):
             prev_frame_keypoints = video_keypoints[i]
             next_frame_keypoints = video_keypoints[i + 1]
-            # 各キーポイントの移動量（オプティカルフロー）を計算
             flow = [np.subtract(next_kp, prev_kp) for prev_kp, next_kp in zip(prev_frame_keypoints, next_frame_keypoints)]
             video_flows.append(flow)
         optical_flows.append(video_flows)
+
+    # データの形状を出力
+    for i, video in enumerate(optical_flows):
+        print(f"Video {i + 1}: {len(video)} flows, {len(video[0]) if video else 0} flow vectors per frame")
+
     return optical_flows
+
 
 # 特徴抽出関数
 def extract_features(optical_flows, frame_interval=20):
     extracted_features = []
+    max_intervals = 0
     for video_flows in optical_flows:
         if len(video_flows) < frame_interval:
-            # フレーム数が間隔より少ない場合はスキップ
             continue
         video_features = []
         for i in range(0, len(video_flows), frame_interval):
-            # 指定したフレーム間隔で特徴を抽出
             interval_flows = video_flows[i:i + frame_interval]
-            # 各キーポイントのオプティカルフローの平均と標準偏差を計算
             mean_flows = np.mean(interval_flows, axis=0)
             std_flows = np.std(interval_flows, axis=0)
-            # 平均と標準偏差を結合して特徴ベクトルを形成
             features = np.concatenate([mean_flows.flatten(), std_flows.flatten()])
             video_features.append(features)
-
         extracted_features.append(video_features)
-    print("extracted_features shape:", np.array(extracted_features).shape)
-    return extracted_features
+        max_intervals = max(max_intervals, len(video_features))
+
+    # パディング処理
+    padded_features = []
+    for video_features in extracted_features:
+        padding = np.zeros((max_intervals - len(video_features), len(video_features[0])))
+        padded_video_features = np.vstack((video_features, padding))
+        padded_features.append(padded_video_features)
+
+    print("Padded extracted features shape:", np.array(padded_features).shape)
+    return padded_features
+
 
 # 次元削減関数
 def reduce_dimensions(features, n_components=2):
@@ -135,24 +150,31 @@ def main(input_dir, output_dir):
 
     # データのクリーニング
     cleaned_keypoints = clean_data(keypoints)
+    # print("cleaned_keypoints shape:", cleaned_keypoints)
 
     # データの正規化
     normalized_keypoints = normalize_data(cleaned_keypoints)
+    for i, video_keypoints in enumerate(normalized_keypoints):
+        num_frames = len(video_keypoints)
+        num_keypoints = len(video_keypoints[0]) if num_frames > 0 else 0
+        print(f"Video {i+1}: {num_frames} frames, {num_keypoints} keypoints per frame")
+        # print("First frame keypoints:")
+        # print(video_keypoints[0])  # 最初のフレームのキーポイントを表示
+        print("----------")
 
     # オプティカルフローの計算
     optical_flows = calculate_optical_flow_from_keypoints(normalized_keypoints)
 
     # 特徴抽出
-    features = extract_features(optical_flows)
+    features = extract_features(optical_flows, 5)
 
     # 次元削減
     reduced_data = reduce_dimensions(features)
+    print("Reduced data shape:", np.array(reduced_data).shape)
 
     # クラスタリング
     clusters = perform_clustering(reduced_data)
 
-    # clustersとfeaturesを標準出力
-    print("clusters:", np.array(clusters).shape)
     # KMeansオブジェクトの属性を出力
     print("クラスタ中心 (Centroids):")
     print(clusters.cluster_centers_)
