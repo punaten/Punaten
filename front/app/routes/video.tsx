@@ -1,3 +1,4 @@
+import { Button } from '@yamada-ui/react';
 import React, { useRef, useState } from 'react';
 
 function App() {
@@ -6,6 +7,8 @@ function App() {
     const [isLoading, setLoading] = useState<boolean>(false);
     const canvasRef = useRef<HTMLCanvasElement>(null); // canvasへの参照
     const videoRef = useRef<HTMLVideoElement>(null); // videoタグへの参照を追加
+    const [downloadUrl, setDownloadUrl] = useState<string>(''); // ダウンロード用のURL
+    const recordedChunksRef = useRef<Blob[]>([]);
 
     const handleBackgroundFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -57,9 +60,6 @@ function App() {
         audioSource.connect(destination);
         audioSource.start(0); // オーディオの再生を開始
 
-        // Canvasからのストリームをvideoタグのソースとして設定
-        const stream = canvas.captureStream();
-        videoRef.current.srcObject = stream;
 
         // 背景画像のピクセルデータを取得
         const bgFrame = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -68,6 +68,7 @@ function App() {
         const draw = () => {
             if (video.paused || video.ended) {
                 setLoading(false);
+                mediaRecorder.stop();
                 return;
             }
 
@@ -91,21 +92,43 @@ function App() {
             requestAnimationFrame(draw);
         };
 
-        video.play().then(() => {
-            requestAnimationFrame(draw);
-        });
-
         // オーディオとビデオの準備ができた後
         const audioStream = destination.stream; // オーディオストリームを取得
         const videoStream = canvas.captureStream(25); // 25fpsでキャンバスからビデオストリームを取得
+
+        const audioTrack = destination.stream.getAudioTracks()[0]; // 音声トラックを取得
+
+        const ms = new MediaStream([...videoStream.getVideoTracks(), audioTrack]);
+        const mediaRecorder = new MediaRecorder(ms);
+
+        mediaRecorder.ondataavailable = (event: BlobEvent) => {
+            if (event.data.size > 0) {
+                recordedChunksRef.current.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            console.log('recorder stopped');
+            const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            setDownloadUrl(url);
+            recordedChunksRef.current = [];
+            setLoading(false);
+        };
+
+
+
+        video.play().then(() => {
+            requestAnimationFrame(draw);
+            mediaRecorder.start();
+        });
+
 
         // videoRefが参照するビデオ要素にストリームを設定
         if (videoRef.current) {
             videoRef.current.srcObject = new MediaStream([...videoStream.getVideoTracks(), ...audioStream.getAudioTracks()]);
             videoRef.current.play().catch(error => console.error('Video play failed', error));
         }
-
-        setLoading(false);
     };
 
     const handleClickGenerate = () => {
@@ -114,6 +137,14 @@ function App() {
             return;
         }
         createChromaKeyComposite();
+    }
+
+    const handleDownload = () => {
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'canvas-animation.webm';
+        a.click();
+        URL.revokeObjectURL(downloadUrl);
     }
 
     return (
@@ -126,6 +157,7 @@ function App() {
             {isLoading && <p>Loading...</p>}
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas> {/* canvasを非表示に */}
             <video ref={videoRef} controls autoPlay style={{ maxWidth: '100%' }}></video> {/* video要素を追加 */}
+            {!isLoading && <button onClick={handleDownload}>download</button>}
         </div>
     );
 }
