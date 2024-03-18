@@ -1,12 +1,6 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
-import {
-  Button,
-  Center,
-  Flex,
-  Motion,
-  Wrap,
-  useColorMode,
-} from "@yamada-ui/react";
+import { Center, Flex, Motion } from "@yamada-ui/react";
+import DarkModeController from "~/components/global/DarkModeController";
 export const meta: MetaFunction = () => {
   return [
     { title: "ダンスDE猫ミーム" },
@@ -18,18 +12,9 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { colorMode, changeColorMode, toggleColorMode } = useColorMode();
-
   return (
     <Center h={"full"}>
-      <Wrap gap="md" position={"fixed"} bottom={0} padding={10}>
-        <Button onClick={() => changeColorMode("light")}>ライトモード</Button>
-        <Button onClick={() => changeColorMode("dark")}>ダークモード</Button>
-        <Button onClick={() => changeColorMode("system")}>システム</Button>
-        <Button onClick={toggleColorMode}>
-          {colorMode === "light" ? "ダーク" : "ライト"}モードに切り替える
-        </Button>
-      </Wrap>
+      <DarkModeController />
       <Flex direction={"column"}>
         <Center>
           <Motion
