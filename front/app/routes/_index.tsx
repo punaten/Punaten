@@ -20,7 +20,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const { colorMode, changeColorMode, toggleColorMode } = useColorMode();
   return (
-    <Center bg={"cream-light"} h={"100dvh"}>
+    <Center h={"full"}>
       <Wrap gap="md" position={"fixed"} bottom={0} padding={10}>
         <Button onClick={() => changeColorMode("light")}>ライトモード</Button>
         <Button onClick={() => changeColorMode("dark")}>ダークモード</Button>
@@ -31,7 +31,7 @@ export default function Index() {
       </Wrap>
       <Flex direction={"column"}>
         <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
-        <Center fontSize={48} color={"cinnamon"} pt={10}>
+        <Center fontSize={48} pt={10}>
           - Tap to Start -
         </Center>
       </Flex>

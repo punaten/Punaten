@@ -1,13 +1,12 @@
-import { extendTheme, UsageTheme } from "@yamada-ui/react"
-// import styles from './styles'
+import { extendTheme, UsageTheme } from "@yamada-ui/react";
+import styles from "./styles";
 // import components from './components'
-import tokens from "./tokens"
+import tokens from "./tokens";
 
 const customTheme: UsageTheme = {
-  // styles,
+  styles,
   // components,
   ...tokens,
-  
-}
+};
 
-export default extendTheme(customTheme)({ omit: ["colors"] })
+export default extendTheme(customTheme)({ omit: ["colors"] });
