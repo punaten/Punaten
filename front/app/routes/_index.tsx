@@ -1,10 +1,10 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
+    { title: "ダンスDE猫ミーム" },
     {
       name: "description",
-      content: "Welcome to Remix! Using Vite and Cloudflare!",
+      content: "ダンスを踊って猫ミームを自動生成するサイトです。",
     },
   ];
 };
