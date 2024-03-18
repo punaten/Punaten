@@ -1,8 +1,8 @@
-import { Center, Flex, Link, Motion } from "@yamada-ui/react";
-import DarkModeController from "~/components/global/DarkModeController";
+import { Center, Flex } from "@yamada-ui/react";
 import SubLogo from "~/components/global/SubLogo";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
+import DarkModeController from "~/components/global/DarkModeController";
 
 const videoConstraints = {
   width: 360,
@@ -11,16 +11,11 @@ const videoConstraints = {
 };
 
 export default function Index() {
-  const [isCaptureEnable, setCaptureEnable] = useState<boolean>(false);
+  const videoLength = 6;
+  const setNum = 3;
+
   const webcamRef = useRef<Webcam>(null);
-  const [url, setUrl] = useState<string | null>(null);
   const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setUrl(imageSrc);
-    }
-  }, [webcamRef]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [capturing, setCapturing] = useState<boolean>(false);
@@ -72,65 +67,35 @@ export default function Index() {
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
-      {/* <DarkModeController /> */}
+      <DarkModeController />
       <SubLogo />
-      <header>
-        <h1>カメラアプリ</h1>
-      </header>
-      {isCaptureEnable || (
-        <button onClick={() => setCaptureEnable(true)}>開始</button>
-      )}
-      {isCaptureEnable && (
-        <>
-          <div>
-            <button onClick={() => setCaptureEnable(false)}>終了</button>
-          </div>
-          <div>
-            <Webcam
-              audio={false}
-              ref={webcamRef}
-              videoConstraints={videoConstraints}
-            />
-            {capturing && !capturedVideo ? (
-              <button onClick={handleStopCaptureClick}>Stop Capture</button>
-            ) : (
-              <button onClick={handleStartCaptureClick}>Start Capture</button>
-            )}
-            {recordedChunks.length > 0 && (
-              <button onClick={handleDownload}>Download</button>
-            )}
-          </div>
 
-          {capturedVideo && (
-            <video controls width="250">
-              <source src={capturedVideo} type="video/webm" />
-              <source src="/media/cc0-videos/flower.mp4" type="video/mp4" />
-              Download the
-              <a href={capturedVideo}>WEBM</a>
-              or
-              <a href="/media/cc0-videos/flower.mp4">MP4</a>
-              video.
-            </video>
-          )}
+      <Flex>
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          videoConstraints={videoConstraints}
+        />
+        {capturing && !capturedVideo ? (
+          <button onClick={handleStopCaptureClick}>Stop</button>
+        ) : (
+          <button onClick={handleStartCaptureClick}>Start</button>
+        )}
+        {recordedChunks.length > 0 && (
+          <button onClick={handleDownload}>Download</button>
+        )}
+      </Flex>
 
-          <button onClick={capture}>キャプチャ</button>
-        </>
-      )}
-      {url && (
-        <>
-          <div>
-            <button
-              onClick={() => {
-                setUrl(null);
-              }}
-            >
-              削除
-            </button>
-          </div>
-          <div>
-            <img src={url} alt="Screenshot" />
-          </div>
-        </>
+      {capturedVideo && (
+        <video controls width="250">
+          <source src={capturedVideo} type="video/webm" />
+          <source src="/media/cc0-videos/flower.mp4" type="video/mp4" />
+          Download the
+          <a href={capturedVideo}>WEBM</a>
+          or
+          <a href="/media/cc0-videos/flower.mp4">MP4</a>
+          video.
+        </video>
       )}
     </Center>
   );
