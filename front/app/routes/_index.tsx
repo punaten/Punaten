@@ -13,7 +13,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const { colorMode, changeColorMode, toggleColorMode } = useColorMode();
   return (
-    <Box>
+    <Box bg={"cream-light"} height={1000}>
       <Wrap gap="md" position={"fixed"} bottom={0} padding={10}>
         <Button onClick={() => changeColorMode("light")}>ライトモード</Button>
         <Button onClick={() => changeColorMode("dark")}>ダークモード</Button>
