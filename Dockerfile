@@ -1,5 +1,5 @@
 # Dockerfile
-FROM emscripten/emsdk:latest
+FROM emscripten/emsdk:3.1.56
 
 # Node.jsとPythonのインストール
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
