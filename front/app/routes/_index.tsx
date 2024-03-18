@@ -1,4 +1,5 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
+import { Box } from "@yamada-ui/react";
 export const meta: MetaFunction = () => {
   return [
     { title: "ダンスDE猫ミーム" },
@@ -10,5 +11,5 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  return <div>Hello World!</div>;
+  return <Box color={"primary.200"}>Hello World!</Box>;
 }

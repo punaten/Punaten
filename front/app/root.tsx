@@ -5,7 +5,12 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import { ThemeConfig, UIProvider, extendConfig } from "@yamada-ui/react";
+import {
+  ThemeConfig,
+  UIProvider,
+  extendConfig,
+  extendTheme,
+} from "@yamada-ui/react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -31,9 +36,20 @@ export const config: ThemeConfig = {
 
 const customConfig = extendConfig(config);
 
+const customTheme = extendTheme({
+  semantics: {
+    colors: {
+      primary: "pink.500",
+    },
+    colorSchemes: {
+      primary: "pink",
+    },
+  },
+})();
+
 export default function App() {
   return (
-    <UIProvider config={customConfig}>
+    <UIProvider config={customConfig} theme={customTheme}>
       <Outlet />
     </UIProvider>
   );
