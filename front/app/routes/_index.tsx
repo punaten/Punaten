@@ -16,7 +16,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <Box w="full" h="100dvh" bgGradient="linear(to-r, purple.500, blue.400)" >
+      <Box w="full" h="100dvh" bgGradient="linear(to-r, purple.500, blue.400)">
         <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
         <ul>
           <li>
@@ -34,7 +34,7 @@ export default function Index() {
             </a>
           </li>
           <li>
-            <Link to={'/createLearnData'}>createLearnData</Link>
+            <Link to={"/createLearnData"}>createLearnData</Link>
           </li>
         </ul>
         <HelloWasm />
