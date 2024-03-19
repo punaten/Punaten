@@ -10,7 +10,14 @@ export default function Index() {
   const { webcamRef, canvasRef, isDetectionOn, isCameraOn, toggleCamera, handleStartCaptureClick, handleStopCaptureClick, handleFinishRecording, handleRestartRecording, handleCancelRecording, setCounter,
     videoLength,
     setNum,
-    timeCounter, } = useRecording();
+    timeCounter,
+    startRecording,
+    restartRecording,
+    cancelRecording,
+    finishRecording,
+    remainingTime,
+    phase,
+    miniPhase } = useRecording();
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
@@ -27,6 +34,7 @@ export default function Index() {
         <canvas ref={canvasRef} />
       </div>
       <div>
+
         <Button bg={"cinnamon"} onClick={handleStartCaptureClick}>
           撮影開始
         </Button>
@@ -44,6 +52,27 @@ export default function Index() {
         <Button bg={"cinnamon"} onClick={handleCancelRecording}>
           キャンセル
         </Button>
+        <Button bg={"cinnamon"} onClick={startRecording}>
+          録画開始
+        </Button>
+        <Button bg={"cinnamon"} onClick={restartRecording}>
+          録り直し
+        </Button>
+        <Button bg={"cinnamon"} onClick={cancelRecording}>
+          キャンセル
+        </Button>
+        <Button bg={"cinnamon"} onClick={finishRecording}>
+          録画終了
+        </Button>
+        <Box>
+          phase{phase}
+        </Box>
+        <Box>
+          miniphase;{miniPhase}
+        </Box>
+        <Box>
+          {remainingTime}
+        </Box>
       </div>
       <DisplayProgresses
         currentTimer={timeCounter}

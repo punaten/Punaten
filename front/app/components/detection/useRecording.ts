@@ -9,23 +9,99 @@ const useRecording = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const maxPhase = 3;
-    //フェーズ 最初が0、最後がmaxPhase
     const [phase, setPhase] = useState<number>(0);
-    const incrementPhase = () => {
+    const [miniPhase, setMiniPhase] = useState<number>(0);
+    const [isRecording, setIsRecording] = useState<boolean>(false);
+    const [remainingTime, setRemainingTime] = useState<number>(0);
+
+    const startRecording = useCallback(() => {
+        setIsRecording(true);
+        setPhase(1);
+        setMiniPhase(0); // 撮影を開始するためにミニフェーズを1に設定
+        setRemainingTime(3000); // 撮影時間を設定
+    }, []);
+
+    const cancelRecording = useCallback(() => {
+        setIsRecording(false);
+        setPhase(0);
+        setMiniPhase(0);
+        setRemainingTime(0);
+    }, []);
+
+    const finishRecording = useCallback(() => {
+        if (phase < maxPhase) {
+            setPhase((prevPhase) => prevPhase + 1); // 次のフェーズに移行
+            setMiniPhase(0); // ミニフェーズをリセット
+            setRemainingTime(3000); // 休憩時間を設定
+        } else {
+            setIsRecording(false); // 撮影を完了
+            setPhase(0); // フェーズをリセット
+            setMiniPhase(0); // ミニフェーズをリセット
+            setRemainingTime(0); // 残り時間をリセット
+        }
+    }, [phase, maxPhase]);
+
+
+    const restartRecording = useCallback(() => {
+        setMiniPhase(1); // 撮影を再開するためにミニフェーズを1に設定
+        setRemainingTime(6000); // 撮影時間をリセット
+    }, []);
+
+    useEffect(() => {
+        if (isRecording) {
+            const timerId = setTimeout(() => {
+                if (phase === 0 && miniPhase === 0) {
+                    setPhase(1); // 撮影を開始するためにフェーズを1に設定
+                    setMiniPhase(0); // 休憩中のフェーズを維持
+                    setRemainingTime(3000); // 休憩時間を設定
+                } else if (phase === maxPhase && miniPhase === 1) {
+                    setIsRecording(false); // 撮影を完了
+                    setPhase(0); // フェーズをリセット
+                    setMiniPhase(0); // ミニフェーズをリセット
+                } else if (miniPhase === 1) {
+                    // 撮影中のフェーズが終了
+                    setMiniPhase(0); // 休憩中のフェーズに移行
+                    setPhase((prevPhase) => prevPhase + 1); // フェーズを進める
+                    setRemainingTime(3000); // 休憩時間を設定
+                }
+                else {
+                    // 休憩中のフェーズが終了
+                    setMiniPhase(1); // 撮影中のフェーズに移行
+                    setRemainingTime(6000); // 撮影時間を設定
+                }
+            }, remainingTime);
+
+            return () => {
+                clearTimeout(timerId);
+            };
+        }
+    }, [isRecording, phase, miniPhase, remainingTime]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setRemainingTime((prevTime) => (prevTime > 0 ? prevTime - 50 : 0));
+        }, 50);
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, []);
+
+
+    const incrementPhase = useCallback(() => {
         if (phase < maxPhase) {
             setPhase(phase + 1);
+            setMiniPhase(0); // フェーズが変わったらミニフェーズをリセット
         }
-    }
-    //ミニフェーズ 0か1 0の場合は休憩中、1の場合は撮影中
-    const [miniPhase, setMiniPhase] = useState<number>(0);
-    const incrementMiniPhase = () => {
+    }, [phase, maxPhase]);
+
+    const incrementMiniPhase = useCallback(() => {
         if (miniPhase < 1) {
             setMiniPhase(miniPhase + 1);
+        } else {
+            incrementPhase(); // ミニフェーズが最大に達したらフェーズを進める
         }
-        else {
-            setMiniPhase(0);
-        }
-    }
+    }, [miniPhase, incrementPhase]);
 
 
     const [timeCounter, setTimeCount] = useState<number>(-3000);
@@ -165,6 +241,13 @@ const useRecording = () => {
         videoLength,
         setNum,
         timeCounter,
+        startRecording,
+        restartRecording,
+        cancelRecording,
+        finishRecording,
+        remainingTime,
+        phase,
+        miniPhase,
     }
 }
 
