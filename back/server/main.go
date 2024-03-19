@@ -13,6 +13,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/google/uuid"
 	"google.golang.org/api/option"
 
@@ -33,6 +34,19 @@ type Video struct {
 func main() {
 	migrate()
 	r := chi.NewRouter()
+
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // すべてのオリジンを許可
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // プリフライトリクエストの結果をキャッシュする最大時間(秒)
+	})
+
+	// ミドルウェアを使用
+	r.Use(corsMiddleware.Handler)
+
 	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
@@ -86,7 +100,7 @@ func getVideo(w http.ResponseWriter, r *http.Request) {
 
 	var video []Video
 
-	qRow,err := db.Query("SELECT * FROM video ORDER BY created_at")
+	qRow, err := db.Query("SELECT * FROM video ORDER BY created_at")
 	if err != nil {
 		log.Fatalf("main db.QueryRow error err:%v", err)
 	}
