@@ -43,7 +43,7 @@ export default function App() {
         {timeline.map((t) => (
           // Using `t.id` as key for more stability compared to index
           <li key={t.id}>
-            <video src={"https://punaten.storage.googleapis.com/" + t.name} controls></video>
+            <video src={"https://punaten.storage.googleapis.com/" + t.name} controls style={{width:400}}></video>
             <p>{t.created_at}</p>
           </li>
         ))}
