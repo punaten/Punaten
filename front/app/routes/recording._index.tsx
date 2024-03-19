@@ -1,6 +1,8 @@
 import { Box, Center, Flex } from "@yamada-ui/react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
+import HelloWasm from "~/components/HelloWasm";
+import PoseDetection from "~/components/detection/PoseDetection";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
 
 const videoConstraints = {
@@ -99,7 +101,7 @@ export default function Index() {
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
-      <Flex>
+      {/* <Flex>
         <Webcam
           audio={false}
           ref={webcamRef}
@@ -126,7 +128,9 @@ export default function Index() {
           <a href="/media/cc0-videos/flower.mp4">MP4</a>
           video.
         </video>
-      )}
+      )} */}
+
+      <PoseDetection />
       <DisplayProgresses
         currentTimer={timeCounter}
         videoLength={videoLength}
