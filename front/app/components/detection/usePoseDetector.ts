@@ -21,7 +21,7 @@ export const usePoseDetector = (
     await tf.ready();
     const model = posedetection.SupportedModels.MoveNet;
     const detectorConfig = {
-      modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelType: posedetection.movenet.modelType.MULTIPOSE_LIGHTNING,
       modelUrl: "https://storage.googleapis.com/punaten/model.json"
     };
     const newDetector = await posedetection.createDetector(
@@ -80,12 +80,12 @@ export const usePoseDetector = (
   );
 
   const detectPoses = useCallback(
-    async (currentIsDetectionOn: boolean) => {
+    async () => {
       if (isCameraOn && detector && videoRef.current && canvasRef.current) {
         const poses = await detector.estimatePoses(videoRef.current, {
           flipHorizontal: false,
         });
-        if (currentIsDetectionOn) {
+        if (poses.length > 0) {
           setDetectedPoses((prev) => [...prev, poses]);
         } else {
           setIsInterval(!isInterval);
@@ -108,7 +108,7 @@ export const usePoseDetector = (
 
   // フラグの変更時にポーズ検出の状態を変更
   useEffect(() => {
-    detectPoses(isDetectionOn);
+    detectPoses();
   }, [isDetectionOn, isInterval, detectedPoses, detectPoses]);
 
   const handleStartDetection = () => {

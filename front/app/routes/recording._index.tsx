@@ -3,82 +3,48 @@ import { Box, Button, Center, Flex } from "@yamada-ui/react";
 import { useRef, useState, useEffect } from "react";
 import { useCamera } from "~/components/detection/useCamera";
 import { usePoseDetector } from "~/components/detection/usePoseDetector";
+import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
 
 export default function Index() {
-  const videoLength = 6000;
-  const setNum = 3;
-
-  const [timeCounter, setTimeCount] = useState<number>(-3000);
-  const [setCounter, setSetCount] = useState<number>(0);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { isCameraOn } = useCamera(videoRef);
-  const {
-    isDetectionOn,
-    detectedPoses,
-    handleStartDetection,
-    handleStopDetection,
-  } = usePoseDetector(videoRef, canvasRef, isCameraOn);
-
-  useEffect(() => {
-    if (isDetectionOn) {
-      const timeoutId = setTimeout(() => {
-        setTimeCount((c) => c + 500);
-      }, 500);
-
-      if (timeCounter >= videoLength) {
-        handleStopDetection();
-        handleDownload(detectedPoses);
-        setSetCount((c) => c + 1);
-        setTimeCount(-3000);
-      }
-
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    } else if (setCounter !== 0 && setCounter <= setNum) {
-      const timeoutId = setTimeout(() => {
-        setTimeCount((c) => c + 500);
-      }, 500);
-
-      if (timeCounter >= 0) {
-        handleStartDetection();
-      }
-
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-  }, [timeCounter, setCounter, isDetectionOn]);
-
-  const handleStartCapturing = () => {
-    setSetCount(1);
-  };
-
-  const handleDownload = (poses: Pose[][]) => {
-    console.log(poses);
-  };
+  const { webcamRef, canvasRef, isDetectionOn, isCameraOn, toggleCamera, handleStartCaptureClick, handleStopCaptureClick, handleFinishRecording, handleRestartRecording, handleCancelRecording, setCounter,
+    videoLength,
+    setNum,
+    timeCounter, } = useRecording();
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
-      <Button bg={"cinnamon"} onClick={handleStartCapturing}>
-        Start
-      </Button>
       <div>
-        <button
-          onClick={isDetectionOn ? handleStopDetection : handleStartDetection}
-        >
+        {/* <button
+          onClick={isDetectionOn ? handleStopCaptureClick : handleStartCaptureClick}
+          >
           {isDetectionOn ? "Stop Detection" : "Start Detection"}
-        </button>
+        </button> */}
         {/* <button onClick={handleDownload}>download</button> */}
-        <video ref={videoRef} style={{ display: "none" }}>
+        <video ref={webcamRef} style={{ display: "none" }}>
           <track kind="captions" />
         </video>
         <canvas ref={canvasRef} />
       </div>
-
+      <div>
+        <Button bg={"cinnamon"} onClick={handleStartCaptureClick}>
+          撮影開始
+        </Button>
+        <Button bg={"cinnamon"} onClick={toggleCamera}>
+          {
+            isCameraOn ? "カメラを止める" : "カメラをつける"
+          }
+        </Button>
+        <Button bg={"cinnamon"} onClick={handleFinishRecording}>
+          撮影終了
+        </Button>
+        <Button bg={"cinnamon"} onClick={handleRestartRecording}>
+          撮り直し
+        </Button>
+        <Button bg={"cinnamon"} onClick={handleCancelRecording}>
+          キャンセル
+        </Button>
+      </div>
       <DisplayProgresses
         currentTimer={timeCounter}
         videoLength={videoLength}
