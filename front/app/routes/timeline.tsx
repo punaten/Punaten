@@ -32,9 +32,9 @@ export default function App() {
   }
 
   // Using an empty dependency array to ensure this effect runs once on mount.
-//   useEffect(() => {
-//     getTimeline();
-//   }, []);
+    useEffect(() => {
+      getTimeline();
+    }, []);
 
   return (
     <div>
@@ -43,12 +43,12 @@ export default function App() {
         {timeline.map((t) => (
           // Using `t.id` as key for more stability compared to index
           <li key={t.id}>
-            <p>{t.name}</p>
+            <video src={"https://punaten.storage.googleapis.com/" + t.name} controls></video>
             <p>{t.created_at}</p>
           </li>
         ))}
       </ul>
-    <Button onClick={getTimeline}>Get Timeline</Button>
+      {/* <Button onClick={getTimeline}>Get Timeline</Button> */}
     </div>
   );
 }

@@ -6,3 +6,7 @@ services:
       - "3000:3000"
     env_file:
       - .env
+  ffmpeg:
+    image: jrottenberg/ffmpeg:4.4-alpine
+    volumes:
+      - ./videos:/videos
