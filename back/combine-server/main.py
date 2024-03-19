@@ -38,4 +38,4 @@ def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDE
     final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
     
     # FastAPIのFileResponseを使用して結合した動画ファイルをクライアントに送信
-    return FileResponse(output_path, media_type='video/mp4', filename='combined_video.mp4')
+    return FileResponse(output_path)
