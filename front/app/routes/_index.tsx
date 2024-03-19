@@ -1,6 +1,5 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { Center, Flex, Link, Motion } from "@yamada-ui/react";
-import DarkModeController from "~/components/global/DarkModeController";
 export const meta: MetaFunction = () => {
   return [
     { title: "ダンスDE猫ミーム" },
@@ -13,8 +12,13 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   return (
-    <Center h={"full"}>
-      <DarkModeController />
+    <Center
+      w={"full"}
+      h={"full"}
+      bg={["cream-light", "dark-caramel"]}
+      zIndex={50}
+      position={"fixed"}
+    >
       <Flex direction={"column"}>
         <Center>
           <Link href="/HowToPlay">

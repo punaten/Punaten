@@ -2,7 +2,6 @@ import { Center, Flex } from "@yamada-ui/react";
 import SubLogo from "~/components/global/SubLogo";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
-import DarkModeController from "~/components/global/DarkModeController";
 
 const videoConstraints = {
   width: 360,
@@ -67,7 +66,6 @@ export default function Index() {
 
   return (
     <Center bg={["cream-dark", "dark"]} h={"full"}>
-      <DarkModeController />
       <SubLogo />
 
       <Flex>

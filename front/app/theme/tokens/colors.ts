@@ -9,5 +9,5 @@ export const colors: ThemeTokens = {
   "cream-light": "#F2E9CE",
   "dark-caramel": "#221F1B",
   "dark-caramel-light": "#302D29",
-  dark: "#131313",
+  dark: "#171510",
 };
