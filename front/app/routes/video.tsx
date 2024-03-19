@@ -5,6 +5,7 @@ function App() {
     const [fileSrc, setFileSrc] = useState<string[]>(["edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"]);
     const [backgroundSrc, setBackgroundSrc] = useState<string>('');
     const [isLoading, setLoading] = useState<boolean>(false);
+    const [blobData, setBlobData] = useState<Blob>();
     const canvasRef = useRef<HTMLCanvasElement>(null); // canvasへの参照
     const videoRef = useRef<HTMLVideoElement>(null); // videoタグへの参照を追加
     const [downloadUrl, setDownloadUrl] = useState<string>(''); // ダウンロード用のURL
@@ -111,6 +112,7 @@ function App() {
             console.log('recorder stopped');
             const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
+            setBlobData(blob);
             setDownloadUrl(url);
             recordedChunksRef.current = [];
             setLoading(false);
@@ -147,6 +149,30 @@ function App() {
         URL.revokeObjectURL(downloadUrl);
     }
 
+    const handleUploadVideo = () => {
+        // FormData オブジェクトの作成
+        const formData = new FormData();
+
+        // FormData に Blob を追加 (ファイルとして)
+        // 第一引数の 'file' はサーバー側でのファイル受け取りキーとなる
+        if (!blobData) return;
+        formData.append('file', blobData, 'video.webm');
+        // API エンドポイントへの POST リクエスト
+        // 'API_ENDPOINT' は実際のAPIのURLに置き換えてください
+        fetch('https://punaten-uvb7exztca-an.a.run.app/upload', {
+            method: 'POST',
+            body: formData,
+            // 'Content-Type': 'multipart/form-data' ヘッダーは自動で設定されるため、明示的に追加する必要はありません
+        })
+            .then(response => response.json()) // レスポンスの JSON を解析
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
     return (
         <div className="app">
             <h1>Chroma Key Compositing</h1>
@@ -157,7 +183,8 @@ function App() {
             {isLoading && <p>Loading...</p>}
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas> {/* canvasを非表示に */}
             <video ref={videoRef} controls autoPlay style={{ maxWidth: '100%' }}></video> {/* video要素を追加 */}
-            {!isLoading && <button onClick={handleDownload}>download</button>}
+            {downloadUrl && <Button onClick={handleDownload}>download</Button>}
+            {downloadUrl && <Button onClick={handleUploadVideo}>Upload</Button>}
         </div>
     );
 }
