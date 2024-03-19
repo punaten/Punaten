@@ -1,9 +1,7 @@
 import { Box, Center, Flex } from "@yamada-ui/react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
-import CircleTimerProgress from "~/components/recording/CircleTimerProgress";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
-import DotSetProgress from "~/components/recording/DotSetProgress";
 
 const videoConstraints = {
   width: 360,

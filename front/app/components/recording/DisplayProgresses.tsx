@@ -1,4 +1,4 @@
-import { Box, Flex } from "@yamada-ui/react";
+import { Flex } from "@yamada-ui/react";
 import CircleTimerProgress from "./CircleTimerProgress";
 import DotSetProgress from "./DotSetProgress";
 
