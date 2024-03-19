@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import DarkModeController from "~/components/global/DarkModeController";
 import CircleTimerProgress from "~/components/recording/CircleTimerProgress";
+import DotSetProgress from "~/components/recording/DotSetProgress";
 
 const videoConstraints = {
   width: 360,
@@ -133,6 +134,7 @@ export default function Index() {
         </video>
       )}
       <CircleTimerProgress value={(timeCounter / videoLength) * 100} />
+      <DotSetProgress value={(timeCounter / videoLength) * 100} />
 
       {capturing && (
         <Box>
