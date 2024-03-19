@@ -7,31 +7,16 @@ const PoseDetection: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { isCameraOn } = useCamera(videoRef);
   const {
-    detectPoses,
     isDetectionOn,
-    setIsDetectionOn,
     detectedPoses,
-    handleResetDetection,
+    handleStartDetection,
+    handleStopDetection,
   } = usePoseDetector(videoRef, canvasRef, isCameraOn);
 
   // 推論の開始/停止を切り替える
-  const handleStartDetection = () => {
-    handleResetDetection();
-    setIsDetectionOn(true);
-  };
-  const handleStopDetection = () => {
-    setIsDetectionOn(false);
-  };
   const handleDownload = () => {
     console.log(detectedPoses);
   };
-
-  // 推論を開始する
-  useEffect(() => {
-    if (isDetectionOn) {
-      detectPoses();
-    }
-  }, [isDetectionOn, detectPoses]);
 
   return (
     <div>

@@ -15,6 +15,7 @@ export const usePoseDetector = (
     null
   );
   const [isDetectionOn, setIsDetectionOn] = useState(false);
+  const [isInterval, setIsInterval] = useState(false);
 
   const initDetector = useCallback(async () => {
     await tf.ready();
@@ -77,35 +78,44 @@ export const usePoseDetector = (
     [canvasRef, videoRef]
   );
 
-  const detectPoses = useCallback(async () => {
-    if (
-      isDetectionOn &&
-      isCameraOn &&
-      detector &&
-      videoRef.current &&
-      canvasRef.current
-    ) {
-      const poses = await detector.estimatePoses(videoRef.current, {
-        flipHorizontal: false,
-      });
-      if (poses) {
-        setDetectedPoses((prev) => [...prev, poses]);
+  const detectPoses = useCallback(
+    async (currentIsDetectionOn: boolean) => {
+      if (isCameraOn && detector && videoRef.current && canvasRef.current) {
+        const poses = await detector.estimatePoses(videoRef.current, {
+          flipHorizontal: false,
+        });
+        if (currentIsDetectionOn) {
+          setDetectedPoses((prev) => [...prev, poses]);
+        } else {
+          setIsInterval(!isInterval);
+        }
+        drawResult(poses);
+        return poses; // ポーズデータを返す
       }
-      drawResult(poses);
-      return poses; // ポーズデータを返す
-    }
-    return null; // 推論が行われない場合はnullを返す
-  }, [isDetectionOn, isCameraOn, detector, videoRef, canvasRef, drawResult]);
+      return null; // 推論が行われない場合はnullを返す
+    },
+    [
+      isDetectionOn,
+      isInterval,
+      isCameraOn,
+      detector,
+      videoRef,
+      canvasRef,
+      drawResult,
+    ]
+  );
 
   // フラグの変更時にポーズ検出の状態を変更
   useEffect(() => {
-    if (isDetectionOn) {
-      detectPoses();
-    }
-  }, [isDetectionOn, detectedPoses, detectPoses]);
+    detectPoses(isDetectionOn);
+  }, [isDetectionOn, isInterval, detectedPoses, detectPoses]);
 
-  const handleResetDetection = () => {
+  const handleStartDetection = () => {
     setDetectedPoses([]);
+    setIsDetectionOn(true);
+  };
+  const handleStopDetection = () => {
+    setIsDetectionOn(false);
   };
 
   return {
@@ -114,6 +124,7 @@ export const usePoseDetector = (
     isDetectionOn,
     setIsDetectionOn,
     detectedPoses,
-    handleResetDetection,
+    handleStartDetection,
+    handleStopDetection,
   };
 };
