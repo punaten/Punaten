@@ -8,7 +8,7 @@ export const usePoseDetector = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
   isCameraOn: boolean
 ) => {
-  const [detectedPoses, setDetectedPoses] = useState<posedetection.Pose[][]>(
+  const [detectedPoses, setDetectedPoses] = useState<posedetection.Pose[]>(
     []
   );
   const [detector, setDetector] = useState<posedetection.PoseDetector | null>(
@@ -86,7 +86,7 @@ export const usePoseDetector = (
           flipHorizontal: false,
         });
         if (poses.length > 0) {
-          setDetectedPoses((prev) => [...prev, poses]);
+          setDetectedPoses((prev) => [...prev, ...poses]);
         } else {
           setIsInterval(!isInterval);
         }
