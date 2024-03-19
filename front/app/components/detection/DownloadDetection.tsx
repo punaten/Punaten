@@ -72,10 +72,11 @@ const DownloadDetection: React.FC = () => {
     };
 
     const downloadPoseData = () => {
+        const filename = videoFile?.name.replace(/\.[^/.]+$/, "") + "_pose_data.json"; // 拡張子を除いたファイル名に "_pose_data.json" を追加
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(poseData));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "pose_data.json");
+        downloadAnchorNode.setAttribute("download", filename);
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();

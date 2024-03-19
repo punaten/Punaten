@@ -68,8 +68,10 @@ emcc app/wasm/hello.c -o app/wasm/hello.html
 https://github.com/tensorflow/tfjs-models/blob/master/pose-detection/src/movenet/README.md
 
 pythonコマンド
+
 ```
 python3 clustering/python/main.py
+```
 
 hello from mercy laptop
 
