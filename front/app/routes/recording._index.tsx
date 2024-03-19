@@ -7,7 +7,7 @@ import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
 
 export default function Index() {
-  const { webcamRef,
+  const { videoRef,
     canvasRef,
     isDetectionOn,
     isCameraOn,
@@ -25,7 +25,7 @@ export default function Index() {
   return (
     <div>
       <Center>
-        <video ref={webcamRef} style={{ display: "none" }}>
+        <video ref={videoRef} style={{ display: "none" }}>
           <track kind="captions" />
         </video>
         <canvas

@@ -6,7 +6,7 @@ const useRecording = () => {
     const videoLength = 8000;
     const restTime = 4000;
     const setNum = 3;
-    const webcamRef = useRef<HTMLVideoElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const maxPhase = 3;
@@ -14,13 +14,13 @@ const useRecording = () => {
     const [miniPhase, setMiniPhase] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [remainingTime, setRemainingTime] = useState<number>(0);
-    const { isCameraOn, startCamera, stopCamera } = useCamera(webcamRef)
+    const { isCameraOn, startCamera, stopCamera } = useCamera(videoRef)
     const {
         isDetectionOn,
         detectedPoses,
         handleStartDetection,
         handleStopDetection,
-    } = usePoseDetector(webcamRef, canvasRef, isCameraOn);
+    } = usePoseDetector(videoRef, canvasRef, isCameraOn);
     const [timeCounter, setTimeCount] = useState<number>(-3000);
     //セットカウンター 今何セット目かをカウント
     
@@ -118,7 +118,7 @@ const useRecording = () => {
     }, [phase, miniPhase]);
 
     return {
-        webcamRef,
+        videoRef,
         canvasRef,
         isCameraOn,
         isDetectionOn,
