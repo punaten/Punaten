@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 from fastapi.middleware.cors import CORSMiddleware
+from pydub import AudioSegment
+
 
 app = FastAPI()
 
@@ -39,3 +41,23 @@ def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDE
     
     # FastAPIのFileResponseを使用して結合した動画ファイルをクライアントに送信
     return FileResponse(output_path)
+
+@app.get('/combine/mp3/{VIDEO_1_PATH}/{VIDEO_2_PATH}/{VIDEO_3_PATH}/{VIDEO_4_PATH}')
+def combine_mp3(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDEO_4_PATH: str):
+    # 曲1の読み込み
+    af1 = AudioSegment.from_mp3("./mp3/" +  VIDEO_1_PATH)
+
+    # 曲2の読み込み
+    af2 = AudioSegment.from_mp3("./mp3/" + VIDEO_2_PATH)
+
+    # 曲3の読み込み
+    af3 = AudioSegment.from_mp3("./mp3/" + VIDEO_3_PATH)
+
+    # 曲4の読み込み
+    af4 = AudioSegment.from_mp3("./mp3/" + VIDEO_4_PATH)
+
+    # 4つの曲を連結する
+    af = af1 + af2 + af3 + af4 
+    af.export("concat.mp3", format="mp3")
+
+    return FileResponse("concat.mp3")

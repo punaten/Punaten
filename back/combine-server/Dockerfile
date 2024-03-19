@@ -4,7 +4,6 @@ FROM python:3.10-slim AS build-stage
 WORKDIR /app
 
 # 必要なパッケージのインストール
-# poetryやpipenvなど、他のパッケージマネージャーを使用する場合は適宜調整してください。
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
@@ -12,7 +11,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # 本番環境用のDockerイメージ
-FROM python:3.10-slim AS production-stage
+FROM mashikotyan/punaten-python-ffmpeg:latest AS production-stage
 
 WORKDIR /app
 
