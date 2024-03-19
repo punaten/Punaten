@@ -1,4 +1,5 @@
 import { Box, CircleProgress, CircleProgressLabel } from "@yamada-ui/react";
+// import CircleProgress from "./CircleProgress";
 
 const CircleTimerProgress = ({
   currentTimer,
@@ -9,8 +10,8 @@ const CircleTimerProgress = ({
 }) => {
   let timerValue = 0;
 
-  if (currentTimer > 0) {
-    timerValue = (currentTimer / videoLength) * 100;
+  if (currentTimer >= 0) {
+    timerValue = Math.floor((currentTimer / videoLength) * 100);
   } else if (currentTimer < -1500) {
     timerValue = 100;
   } else {
@@ -30,11 +31,13 @@ const CircleTimerProgress = ({
         trackColor={["caramel", "dark-caramel"]}
         thickness={4}
         size={60}
+        isAnimation={false}
       >
         <CircleProgressLabel color={["cinnamon", "caramel"]}>
           {intervalCount}
         </CircleProgressLabel>
       </CircleProgress>
+      {/* <CircleProgress value={timerValue} /> */}
     </Box>
   );
 };
