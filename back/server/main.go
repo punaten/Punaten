@@ -21,14 +21,13 @@ import (
 
 const (
 	bucketName      = "punaten"
-	credentialsFile = "keyfile.json"
 )
 
 type Video struct {
-	ID         string `json:"id"`
-	User_ID    string `json:"user_id"`
-	Name       string `json:"name"`
-	Created_at string `json:"created_at"`
+	ID         string `json:"id" db:"id"`
+	User_ID    string `json:"user_id" db:"user_id"`
+	Name       string `json:"name" db:"name"`
+	Created_at string `json:"created_at" db:"created_at"`
 }
 
 func main() {
@@ -50,7 +49,8 @@ func main() {
 }
 
 func migrate() {
-	db, err := sql.Open("postgres", "host=34.170.25.201 user=punaten_user password=punaten_password dbname=video sslmode=disable")
+	db_str := os.Getenv("DB_STRING")
+	db, err := sql.Open("postgres", db_str)
 	if err != nil {
 		log.Fatalf("main sql.Open error err:%v", err)
 	}
@@ -63,7 +63,8 @@ func migrate() {
 }
 
 func getVideo(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("postgres", "punaten_user:punaten_password@tcp(34.170.25.201)/video?parseTime=true&loc=Asia%2FTokyo")
+	db_str := os.Getenv("DB_STRING")
+	db, err := sql.Open("postgres", db_str)
 	if err != nil {
 		log.Fatalf("main sql.Open error err:%v", err)
 	}
@@ -71,7 +72,10 @@ func getVideo(w http.ResponseWriter, r *http.Request) {
 
 	var video Video
 
-	db.QueryRow("SELECT * FROM video ORDER BY created_at DESC LIMIT 1").Scan(video)
+	err = db.QueryRow("SELECT * FROM video ORDER BY created_at DESC LIMIT 1").Scan(&video.ID, &video.User_ID, &video.Name, &video.Created_at)
+	if err != nil {
+		log.Fatalf("main db.QueryRow error err:%v", err)
+	}
 
 	w.WriteHeader(http.StatusOK)
 
@@ -83,14 +87,18 @@ func getVideo(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadFileForGCS(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("postgres", "punaten_user:punaten_password@tcp(34.170.25.201)/video?parseTime=true&loc=Asia%2FTokyo")
+	db_str := os.Getenv("DB_STRING")
+	db, err := sql.Open("postgres", db_str)
 	if err != nil {
 		log.Fatalf("main sql.Open error err:%v", err)
 	}
 	defer db.Close()
 
+	gcs_key := os.Getenv("GCS_KEY")
+	fmt.Println(gcs_key)
+
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx, option.WithCredentialsJSON([]byte(os.Getenv("GCS_KEY"))))
+	client, err := storage.NewClient(ctx, option.WithCredentialsJSON([]byte(gcs_key)))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -123,9 +131,10 @@ func uploadFileForGCS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.QueryRow("INSERT INTO video(id, user_id, name) VALUES($1,$2,$3)", uuid_str, "1", uuid_str+handler.Filename).Scan()
+	err = db.QueryRow("INSERT INTO video(id, user_id, name) VALUES($1,$2,$3)", uuid_str, "1", uuid_str+handler.Filename).Err()
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
