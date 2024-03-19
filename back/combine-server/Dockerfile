@@ -11,7 +11,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # 本番環境用のDockerイメージ
-FROM mashikotyan/punaten-python-ffmpeg:latest AS production-stage
+FROM mashikotyan/punaten-python-ffmpeg:1.0 AS production-stage
 
 WORKDIR /app
 
