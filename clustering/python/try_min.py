@@ -219,20 +219,28 @@ def main(input_dir, output_dir):
     hand_flows = calculate_optical_flow_for_parts(normalized_keypoints, HAND_KEYPOINTS)
     leg_flows = calculate_optical_flow_for_parts(normalized_keypoints, LEG_KEYPOINTS)
     torso_flows = calculate_optical_flow_for_parts(normalized_keypoints, TORSO_KEYPOINTS)
+    # print("Hand flows shape:", np.array(hand_flows).shape)
+    # print("Leg flows shape:", np.array(leg_flows).shape)
+    # print("Torso flows shape:", np.array(torso_flows).shape)
 
     # パーツごとの特徴量抽出
     hand_features = extract_features_for_parts(hand_flows)
     leg_features = extract_features_for_parts(leg_flows)
     torso_features = extract_features_for_parts(torso_flows)
+    print("Hand features shape:", len(hand_features), len(hand_features[0]))
+    print("Leg features shape:", len(leg_features), len(leg_features[0]))
+    print("Torso features shape:", len(torso_features), len(torso_features[0]))
 
     # パーツごとの特徴量を結合して最終的な特徴ベクトルを作成
     final_features = [np.concatenate([hf, lf, tf], axis=1) for hf, lf, tf in zip(hand_features, leg_features, torso_features)]
+    print("Final features shape:", len(final_features), len(final_features[0]))
 
     # target_length = 50  # リサンプリング後のフレーム数
     # resampled_features = resample_features(final_features, target_length)
 
     # features = extract_features(optical_flows)
     averaged_features = average_features(final_features)
+    print("Averaged features shape:", np.array(averaged_features).shape)
     labels = cluster_features([averaged_features], n_clusters=3)  # リストのリストとして渡す
     plot_clusters_with_labels([averaged_features], labels, labels, output_dir)  # リストのリストとして渡す
     # labels = cluster_features(final_features, n_clusters=5)

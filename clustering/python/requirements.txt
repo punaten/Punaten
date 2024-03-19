@@ -6,3 +6,4 @@ opencv-python
 seaborn
 joblib
 skl2onnx
+cmake
