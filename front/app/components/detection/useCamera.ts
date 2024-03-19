@@ -1,11 +1,47 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 export const useCamera = (videoRef: React.RefObject<HTMLVideoElement>) => {
   const [isCameraOn, setIsCameraOn] = useState(false);
 
+  // useEffect(() => {
+  //   const startCamera = async () => {
+  //     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  //       const stream = await navigator.mediaDevices.getUserMedia({
+  //         video: true,
+  //       });
+  //       if (videoRef.current) {
+  //         videoRef.current.srcObject = stream;
+  //         videoRef.current.onloadedmetadata = () => {
+  //           videoRef.current?.play();
+  //           setIsCameraOn(true);
+  //         };
+  //       }
+  //     }
+  //   };
+  //   startCamera();
+  // }, [videoRef]);
+
+  // useEffect(() => {
+  //   const startCamera = async () => {
+  //     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  //       const stream = await navigator.mediaDevices.getUserMedia({
+  //         video: true,
+  //       });
+  //       if (videoRef.current) {
+  //         videoRef.current.srcObject = stream;
+  //         await videoRef.current.play();
+  //         setIsCameraOn(true);
+  //       }
+  //     }
+  //   };
+  //   startCamera();
+  // }, [videoRef]);
+
   const startCamera = useCallback(async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
@@ -22,5 +58,5 @@ export const useCamera = (videoRef: React.RefObject<HTMLVideoElement>) => {
     }
   }, [videoRef]);
 
-  return { startCamera, stopCamera, isCameraOn, setIsCameraOn };
+  return { isCameraOn, startCamera, stopCamera };
 };

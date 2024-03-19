@@ -12,10 +12,12 @@ import {
   extendTheme,
 } from "@yamada-ui/react";
 import theme from "./theme";
+import SubLogo from "./components/global/SubLogo";
+import DarkModeController from "./components/global/DarkModeController";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -46,7 +48,9 @@ const customConfig = extendConfig(config);
 export default function App() {
   return (
     <UIProvider config={customConfig} theme={theme}>
+      <SubLogo />
       <Outlet />
+      <DarkModeController />
     </UIProvider>
   );
 }
