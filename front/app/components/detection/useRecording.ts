@@ -111,9 +111,11 @@ const useRecording = () => {
         } else {
             stopCamera();
             handleStopDetection();
+            if(detectedPoses.length > 0){
+                console.log(detectedPoses);
+            }
         }
     }, [phase, miniPhase]);
-
 
     // const incrementPhase = useCallback(() => {
     //     if (phase < maxPhase) {

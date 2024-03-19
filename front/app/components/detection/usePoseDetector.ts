@@ -103,6 +103,7 @@ export const usePoseDetector = (
       videoRef,
       canvasRef,
       drawResult,
+      detectedPoses,
     ]
   );
 
