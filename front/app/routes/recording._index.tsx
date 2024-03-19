@@ -83,7 +83,7 @@ export default function Index() {
       if (timeCounter >= videoLength) {
         console.log("send the video");
         setSetCount((c) => c + 1);
-        setTimeCount(0);
+        setTimeCount(-3000);
       }
 
       if (setCounter >= setNum + 1) {

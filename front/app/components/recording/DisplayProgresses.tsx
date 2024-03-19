@@ -13,7 +13,6 @@ const DisplayProgresses = ({
   currentSet: number;
   setNum: number;
 }) => {
-  const timerValue = (currentTimer / videoLength) * 100;
   return (
     <Flex
       position={"fixed"}
@@ -23,7 +22,10 @@ const DisplayProgresses = ({
       gap={4}
       direction={"column"}
     >
-      <CircleTimerProgress value={timerValue} />
+      <CircleTimerProgress
+        currentTimer={currentTimer}
+        videoLength={videoLength}
+      />
       <DotSetProgress currentSet={currentSet} setNum={setNum} />
     </Flex>
   );
