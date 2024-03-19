@@ -61,7 +61,7 @@ docker run -it --rm -v ${PWD}:/app -p 3000:3000 -p 8000:8000 remix-wasm
 コンパイル
 
 ```sh
-emcc app/wasm/hello.c -o app/wasm/hello.html
+emcc front/app/wasm/cpp/hello.cpp -o front/public/hello.html
 ```
 
 利用した推論モデル

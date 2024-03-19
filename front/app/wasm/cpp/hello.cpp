@@ -10,15 +10,15 @@ extern "C"
         {
             return 0;
         }
-        else if ((leftHandYSpeed + rightHandYSpeed) >= 100 && (leftHandXSpeed + rightHandXSpeed) < 70)
+        else if ((leftHandYSpeed + rightHandYSpeed) >= 15 && (leftHandXSpeed + rightHandXSpeed) < 10)
         {
             return 1;
         }
-        else if (speedValue >= 300)
+        else if (speedValue >= 30)
         {
             return 2;
         }
-        else if (overHandCount >= 10)
+        else if (overHandCount >= 30)
         {
             return 3;
         }
