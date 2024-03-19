@@ -32,7 +32,12 @@ export default function Index() {
               bg="primary"
               color="white"
             >
-              <img src="/logo.webp" alt="ロゴ" width={602} height={350} />
+              <img
+                src="/logo.webp"
+                alt="ダンスDE猫ミームのロゴ"
+                width={602}
+                height={350}
+              />
             </Motion>
           </Link>
         </Center>
