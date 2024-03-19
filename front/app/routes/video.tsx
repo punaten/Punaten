@@ -11,35 +11,49 @@ function App() {
     const [fetchVideoURL, setFetchVideoURL] = useState<string>('https://storage.googleapis.com/punaten/5c46c712-1ff2-46f1-85f1-488430dc1f74video.webm');
     const [downloadUrl, setDownloadUrl] = useState<string>(''); // ダウンロード用のURL
     const recordedChunksRef = useRef<Blob[]>([]);
+    // MP3データを保存するためのuseState
+    const [audioData, setAudioData] = useState<ArrayBuffer>();
+    const fetchFiles = async () => {
+        // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
+        let suffix = ""
+        let mp3Suffix = ""
+        for (let i = 0; i < 4; i++) {
+            const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)];
+
+            // 動画ファイル名をAPIに送信するための形式に整形
+            const videoSrc = videoAndAudioFileName + ".mp4"; // ここでは1つのファイル名を使用
+            const mp3Src = videoAndAudioFileName + ".mp3";
+            suffix += "/" + videoSrc;
+            mp3Suffix += "/" + mp3Src;
+        }
+
+        // APIリクエストの送信
+        const response = await fetch('https://punaten-video-uvb7exztca-an.a.run.app/combine' + suffix, {
+            method: 'GET', // GETメソッドを使用
+        });
+
+        const res = await fetch("http://0.0.0.0:8080/combine/mp3" + mp3Suffix, {
+            method: 'GET', // GETメソッドを使用
+        })
+
+        // レスポンスをArrayBufferとして取得
+        const data = await res.arrayBuffer();
+        // 取得したArrayBufferを状態に保存
+        setAudioData(data);
+
+        console.log(response);
+        if (response.ok) {
+            const blob = await response.blob(); // レスポンスをBlobとして取得
+            const videoURL = URL.createObjectURL(blob); // BlobからURLを生成
+            setFetchVideoURL(videoURL); // video要素のsrcに設定
+        } else {
+            console.error('Failed to fetch video');
+        }
+    };
+
 
     // useEffect(() => {
-    //     const fetchFiles = async () => {
-    //         // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
-    //         let suffix = "" 
-    //         for(let i = 0; i <4 ;i ++){
-    //             const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)];
 
-    //             // 動画ファイル名をAPIに送信するための形式に整形
-    //             const videoSrc = videoAndAudioFileName + ".mp4"; // ここでは1つのファイル名を使用
-    //             suffix += "/"  + videoSrc;
-    //         }
-
-    //         const r = await fetch('https://punaten-video-uvb7exztca-an.a.run.app')
-
-    //         // APIリクエストの送信
-    //         const response = await fetch('https://punaten-video-uvb7exztca-an.a.run.app/combine' + suffix, {
-    //             method: 'GET', // GETメソッドを使用
-    //         });
-
-            
-    //         if (response.ok) {
-    //             const blob = await response.blob(); // レスポンスをBlobとして取得
-    //             const videoURL = URL.createObjectURL(blob); // BlobからURLを生成
-    //             setFetchVideoURL(videoURL); // video要素のsrcに設定
-    //         } else {
-    //             console.error('Failed to fetch video');
-    //         }
-    //     };
 
     //     fetchFiles();
     // }, []);
@@ -75,7 +89,7 @@ function App() {
 
         // video要素を設定
         const video = document.createElement('video');
-        video.src = "/public/edm.mp4"
+        video.src = fetchVideoURL;
         video.muted = true;
         video.autoplay = true;
         await new Promise((resolve) => {
@@ -84,7 +98,8 @@ function App() {
 
         // Audio setup
         const audioContext = new AudioContext();
-        const audioData = await fetch("/public/" + "edm" + ".mp3").then(response => response.arrayBuffer());
+        // const audioData = await fetch("/public/" + "edm" + ".mp3").then(response => response.arrayBuffer());
+        if (!audioData) return;
         const decodedAudioData = await audioContext.decodeAudioData(audioData);
         const audioSource = audioContext.createBufferSource();
         audioSource.buffer = decodedAudioData;
@@ -204,9 +219,15 @@ function App() {
             });
     }
 
+    const handleFetchClick = () => {
+        fetchFiles();
+    }
+
     return (
         <div className="app">
             <h1>Chroma Key Compositing</h1>
+            <Button onClick={handleFetchClick}>fetch</Button>
+            {fetchVideoURL}
             <div>
                 <input type="file" accept="image/*" onChange={handleBackgroundFile} />
             </div>
