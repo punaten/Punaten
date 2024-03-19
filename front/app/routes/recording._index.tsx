@@ -2,6 +2,7 @@ import { Box, Center, Flex } from "@yamada-ui/react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import CircleTimerProgress from "~/components/recording/CircleTimerProgress";
+import DisplayProgresses from "~/components/recording/DisplayProgresses";
 import DotSetProgress from "~/components/recording/DotSetProgress";
 
 const videoConstraints = {
@@ -128,8 +129,12 @@ export default function Index() {
           video.
         </video>
       )}
-      <CircleTimerProgress value={(timeCounter / videoLength) * 100} />
-      <DotSetProgress value={(timeCounter / videoLength) * 100} />
+      <DisplayProgresses
+        currentTimer={timeCounter}
+        videoLength={videoLength}
+        currentSet={setCounter}
+        setNum={setNum}
+      />
 
       {capturing && (
         <Box>

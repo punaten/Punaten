@@ -2,7 +2,7 @@ import { Box, CircleProgress } from "@yamada-ui/react";
 
 const CircleTimerProgress = ({ value }: { value: number }) => {
   return (
-    <Box position={"fixed"} bottom={28} right={16} zIndex={5}>
+    <Box>
       <CircleProgress
         value={value}
         color={"cinnamon"}
