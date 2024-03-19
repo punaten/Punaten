@@ -32,7 +32,7 @@ function App() {
             method: 'GET', // GETメソッドを使用
         });
 
-        const res = await fetch("http://0.0.0.0:8080/combine/mp3" + mp3Suffix, {
+        const res = await fetch("https://punaten-video-uvb7exztca-an.a.run.app/combine/mp3" + mp3Suffix, {
             method: 'GET', // GETメソッドを使用
         })
 
