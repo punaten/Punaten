@@ -8,13 +8,14 @@
     "deploy": "npm run build && wrangler pages deploy ./build/client",
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "wrangler pages dev ./build/client",
+    "start": "wrangler pages dev ./build/client --remote",
     "typecheck": "tsc",
     "typegen": "wrangler types",
     "preview": "npm run build && wrangler pages dev ./build/client",
     "build-cf-types": "wrangler types"
   },
   "dependencies": {
+    "@cfworker/uuid": "^1.12.4",
     "@remix-run/cloudflare": "^2.8.0",
     "@remix-run/cloudflare-pages": "^2.8.0",
     "@remix-run/react": "^2.8.0",
