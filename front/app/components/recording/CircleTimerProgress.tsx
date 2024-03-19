@@ -23,15 +23,17 @@ const CircleTimerProgress = ({
       : "";
 
   return (
-    <Box>
+    <Box opacity={20}>
       <CircleProgress
         value={timerValue}
-        color={"cinnamon"}
-        trackColor={"caramel"}
+        color={["cinnamon", "caramel"]}
+        trackColor={["caramel", "dark-caramel"]}
         thickness={4}
         size={60}
       >
-        <CircleProgressLabel color="cream">{intervalCount}</CircleProgressLabel>
+        <CircleProgressLabel color={["cinnamon", "caramel"]}>
+          {intervalCount}
+        </CircleProgressLabel>
       </CircleProgress>
     </Box>
   );

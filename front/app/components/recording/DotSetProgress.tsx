@@ -19,13 +19,25 @@ const DotSetProgress = ({
       {items.map((item) => (
         <Center
           key={item.num}
-          bg={"cinnamon"}
+          bg={
+            item.selected
+              ? ["cinnamon", "caramel"]
+              : ["caramel", "dark-caramel"]
+          }
           rounded={32}
           width={16}
           height={16}
         >
-          <Box color={"cream-light"}>
-            {item.num}:{item.selected ? "⚫︎" : "✖︎"}
+          <Box
+            color={
+              item.selected
+                ? ["caramel", "dark-caramel"]
+                : ["cinnamon", "caramel"]
+            }
+            fontWeight={"bold"}
+            fontSize={24}
+          >
+            {item.num}
           </Box>
         </Center>
       ))}
