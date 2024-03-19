@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	bucketName      = "punaten"
+	bucketName = "punaten"
 )
 
 type Video struct {
@@ -62,6 +62,20 @@ func migrate() {
 	}
 }
 
+func alldrop() {
+	db_str := os.Getenv("DB_STRING")
+	db, err := sql.Open("postgres", db_str)
+	if err != nil {
+		log.Fatalf("main sql.Open error err:%v", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec("DROP TABLE video")
+	if err != nil {
+		log.Fatalf("main db.Exec error err:%v", err)
+	}
+}
+
 func getVideo(w http.ResponseWriter, r *http.Request) {
 	db_str := os.Getenv("DB_STRING")
 	db, err := sql.Open("postgres", db_str)
@@ -70,11 +84,20 @@ func getVideo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	var video Video
+	var video []Video
 
-	err = db.QueryRow("SELECT * FROM video ORDER BY created_at DESC LIMIT 1").Scan(&video.ID, &video.User_ID, &video.Name, &video.Created_at)
+	qRow,err := db.Query("SELECT * FROM video ORDER BY created_at")
 	if err != nil {
 		log.Fatalf("main db.QueryRow error err:%v", err)
+	}
+
+	for qRow.Next() {
+		var v Video
+		err = qRow.Scan(&v.ID, &v.User_ID, &v.Name, &v.Created_at)
+		if err != nil {
+			log.Fatalf("main db.QueryRow error err:%v", err)
+		}
+		video = append(video, v)
 	}
 
 	w.WriteHeader(http.StatusOK)
