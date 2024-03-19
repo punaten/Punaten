@@ -7,7 +7,10 @@ import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
 
 export default function Index() {
-  const { webcamRef, canvasRef, isDetectionOn, isCameraOn, toggleCamera, handleStartCaptureClick, handleStopCaptureClick, handleFinishRecording, handleRestartRecording, handleCancelRecording, setCounter,
+  const { webcamRef,
+    canvasRef,
+    isDetectionOn,
+    isCameraOn,
     videoLength,
     setNum,
     timeCounter,
@@ -20,69 +23,54 @@ export default function Index() {
     miniPhase } = useRecording();
 
   return (
-    <Center bg={["cream-dark", "dark"]} h={"full"}>
-      <div>
-        {/* <button
-          onClick={isDetectionOn ? handleStopCaptureClick : handleStartCaptureClick}
-          >
-          {isDetectionOn ? "Stop Detection" : "Start Detection"}
-        </button> */}
-        {/* <button onClick={handleDownload}>download</button> */}
+    <div>
+      <Center>
         <video ref={webcamRef} style={{ display: "none" }}>
           <track kind="captions" />
         </video>
-        <canvas ref={canvasRef} />
-      </div>
-      <div>
-
-        <Button bg={"cinnamon"} onClick={handleStartCaptureClick}>
-          撮影開始
-        </Button>
-        <Button bg={"cinnamon"} onClick={toggleCamera}>
-          {
-            isCameraOn ? "カメラを止める" : "カメラをつける"
-          }
-        </Button>
-        <Button bg={"cinnamon"} onClick={handleFinishRecording}>
-          撮影終了
-        </Button>
-        <Button bg={"cinnamon"} onClick={handleRestartRecording}>
-          撮り直し
-        </Button>
-        <Button bg={"cinnamon"} onClick={handleCancelRecording}>
-          キャンセル
-        </Button>
-        <Button bg={"cinnamon"} onClick={startRecording}>
-          録画開始
-        </Button>
-        <Button bg={"cinnamon"} onClick={restartRecording}>
-          録り直し
-        </Button>
-        <Button bg={"cinnamon"} onClick={cancelRecording}>
-          キャンセル
-        </Button>
-        <Button bg={"cinnamon"} onClick={finishRecording}>
-          録画終了
-        </Button>
-        <Box>
-          phase{phase}
-        </Box>
-        <Box>
-          miniphase;{miniPhase}
-        </Box>
-        <Box>
-          {remainingTime}
-        </Box>
-      </div>
-      <DisplayProgresses
-        currentTimer={timeCounter}
-        videoLength={videoLength}
-        currentSet={setCounter}
-        setNum={setNum}
-      />
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: "40rem",
+            height: "30rem",
+            visibility: miniPhase === 0 ? "hidden" : "visible"
+          }}
+        />
+      </Center>
+      <Center as="div" bg={["cream-dark", "dark"]} minH={"5rem"} p={"2rem"} display={"block"}>
+        <div style={{ width: "fit-content", margin: "auto" }}>
+          <Button bg={"cinnamon"} onClick={startRecording}>
+            録画開始
+          </Button>
+          <Button bg={"cinnamon"} onClick={restartRecording}>
+            録り直し
+          </Button>
+          <Button bg={"cinnamon"} onClick={cancelRecording}>
+            キャンセル
+          </Button>
+          <Button bg={"cinnamon"} onClick={finishRecording}>
+            録画終了
+          </Button>
+        </div>
+        <DisplayProgresses
+          currentTimer={videoLength - remainingTime * 2}
+          videoLength={videoLength}
+          currentSet={phase}
+          setNum={setNum}
+        />
+      </Center>
       <Box>
-        {setCounter}:{timeCounter}
+        phase{phase}
       </Box>
-    </Center>
+      <Box>
+        miniphase;{miniPhase}
+      </Box>
+      <Box>
+        {remainingTime}
+      </Box>
+      {/* <Box>
+        {phase}:{timeCounter}
+      </Box> */}
+    </div>
   );
 }
