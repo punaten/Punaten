@@ -18,5 +18,8 @@ RUN echo "source /emsdk/emsdk_env.sh" >> ~/.bashrc
 # ポートの公開（RemixアプリとEmscriptenのサーバー用）
 EXPOSE 3000 8000
 
-# コンテナ起動時に実行されるコマンド
+# Flaskアプリケーションのコードをコピー
+COPY back/flask_server/app.py .
+
+# コンテナ起動時に実行されるコマンド（Flaskアプリケーションを起動）
 CMD ["bash"]

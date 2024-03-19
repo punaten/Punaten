@@ -7,3 +7,4 @@ seaborn
 joblib
 skl2onnx
 cmake
+flask
