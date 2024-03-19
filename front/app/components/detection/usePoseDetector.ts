@@ -22,6 +22,7 @@ export const usePoseDetector = (
     const model = posedetection.SupportedModels.MoveNet;
     const detectorConfig = {
       modelType: posedetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelUrl: "https://storage.googleapis.com/punaten/model.json"
     };
     const newDetector = await posedetection.createDetector(
       model,
