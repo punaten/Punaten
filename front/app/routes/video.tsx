@@ -232,7 +232,6 @@ function App() {
                 <input type="file" accept="image/*" onChange={handleBackgroundFile} />
             </div>
             <button onClick={handleClickGenerate}>生成</button>
-            {isLoading && <p>Loading...</p>}
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas> {/* canvasを非表示に */}
             <video ref={videoRef} controls autoPlay style={{ maxWidth: '100%' }}></video> {/* video要素を追加 */}
             {downloadUrl && <Button onClick={handleDownload}>download</Button>}
