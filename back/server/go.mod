@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
+	github.com/u2takey/ffmpeg-go v0.5.0
 	google.golang.org/api v0.170.0
 )
 
@@ -16,6 +17,7 @@ require (
 	cloud.google.com/go/compute v1.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.6 // indirect
+	github.com/aws/aws-sdk-go v1.51.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -24,6 +26,8 @@ require (
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.2 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/u2takey/go-utils v0.3.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
