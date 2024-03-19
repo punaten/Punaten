@@ -1,0 +1,7 @@
+# context .で起動するdocker-compose
+version: '3'
+services:
+  webapp:
+    build: .
+    ports:
+      - "8080:8080"
