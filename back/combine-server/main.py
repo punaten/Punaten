@@ -23,7 +23,7 @@ async def index():
     return {'message': 'Hello World'}
 
 @app.get('/combine/{VIDEO_1_PATH}/{VIDEO_2_PATH}/{VIDEO_3_PATH}/{VIDEO_4_PATH}')
-async def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDEO_4_PATH: str):
+def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDEO_4_PATH: str):
     # 動画ファイルを読み込む
     clip1 = VideoFileClip("./video/" +  VIDEO_1_PATH)
     clip2 = VideoFileClip("./video/" + VIDEO_2_PATH)

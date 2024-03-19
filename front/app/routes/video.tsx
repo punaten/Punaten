@@ -1,5 +1,5 @@
 import { Button } from '@yamada-ui/react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function App() {
     const [fileSrc, setFileSrc] = useState<string[]>(["edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"]);
@@ -8,8 +8,41 @@ function App() {
     const [blobData, setBlobData] = useState<Blob>();
     const canvasRef = useRef<HTMLCanvasElement>(null); // canvasへの参照
     const videoRef = useRef<HTMLVideoElement>(null); // videoタグへの参照を追加
+    const [fetchVideoURL, setFetchVideoURL] = useState<string>('https://storage.googleapis.com/punaten/5c46c712-1ff2-46f1-85f1-488430dc1f74video.webm');
     const [downloadUrl, setDownloadUrl] = useState<string>(''); // ダウンロード用のURL
     const recordedChunksRef = useRef<Blob[]>([]);
+
+    // useEffect(() => {
+    //     const fetchFiles = async () => {
+    //         // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
+    //         let suffix = "" 
+    //         for(let i = 0; i <4 ;i ++){
+    //             const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)];
+
+    //             // 動画ファイル名をAPIに送信するための形式に整形
+    //             const videoSrc = videoAndAudioFileName + ".mp4"; // ここでは1つのファイル名を使用
+    //             suffix += "/"  + videoSrc;
+    //         }
+
+    //         const r = await fetch('https://punaten-video-uvb7exztca-an.a.run.app')
+
+    //         // APIリクエストの送信
+    //         const response = await fetch('https://punaten-video-uvb7exztca-an.a.run.app/combine' + suffix, {
+    //             method: 'GET', // GETメソッドを使用
+    //         });
+
+            
+    //         if (response.ok) {
+    //             const blob = await response.blob(); // レスポンスをBlobとして取得
+    //             const videoURL = URL.createObjectURL(blob); // BlobからURLを生成
+    //             setFetchVideoURL(videoURL); // video要素のsrcに設定
+    //         } else {
+    //             console.error('Failed to fetch video');
+    //         }
+    //     };
+
+    //     fetchFiles();
+    // }, []);
 
     const handleBackgroundFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -38,13 +71,11 @@ function App() {
             };
         });
 
-        // ランダムに動画ファイル名を選択
-        const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)];
-        const videoSrc = "/public/" + videoAndAudioFileName + ".mp4";
+
 
         // video要素を設定
         const video = document.createElement('video');
-        video.src = videoSrc;
+        video.src = "/public/edm.mp4"
         video.muted = true;
         video.autoplay = true;
         await new Promise((resolve) => {
@@ -53,7 +84,7 @@ function App() {
 
         // Audio setup
         const audioContext = new AudioContext();
-        const audioData = await fetch("/public/" + videoAndAudioFileName + ".mp3").then(response => response.arrayBuffer());
+        const audioData = await fetch("/public/" + "edm" + ".mp3").then(response => response.arrayBuffer());
         const decodedAudioData = await audioContext.decodeAudioData(audioData);
         const audioSource = audioContext.createBufferSource();
         audioSource.buffer = decodedAudioData;
