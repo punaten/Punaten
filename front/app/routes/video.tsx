@@ -314,7 +314,7 @@ function App() {
       <Center>
         <Box fontSize={"3rem"}>動画をつくる</Box>
         {/* <Button onClick={handleFetchClick}>fetch</Button> */}
-        {fetchVideoURL}
+        <Box display={"none"}>{fetchVideoURL}</Box>
         <button onClick={handleClickGenerate}>動画をつくる</button>
         <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
         {/* canvasを非表示に */}
@@ -328,8 +328,6 @@ function App() {
             display: `${isLoading ? "block" : "none"}`,
           }}
         ></video>{" "}
-        {/* video要素を追加 */}
-        {/* <video src={downloadUrl} controls style={{ maxWidth: '100%' }}></video> video要素を追加 */}
         {downloadUrl && (
           <Button onClick={handleDownload}>動画をダウンロード</Button>
         )}
