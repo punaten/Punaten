@@ -3,6 +3,8 @@ import {
   Box,
   Button,
   Center,
+  Flex,
+  Loading,
   Modal,
   ModalBody,
   ModalHeader,
@@ -24,6 +26,7 @@ function App() {
   const [backgroundSrc, setBackgroundSrc] = useState<string>("");
   const isImageSelected = backgroundSrc !== "";
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [isVideoFetching, setIsVideoFetching] = useState<boolean>(false);
   const [blobData, setBlobData] = useState<Blob>();
   const canvasRef = useRef<HTMLCanvasElement>(null); // canvasへの参照
   const videoRef = useRef<HTMLVideoElement>(null); // videoタグへの参照を追加
@@ -214,6 +217,8 @@ function App() {
 
   const fetchFiles = async () => {
     // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
+    setIsVideoFetching(true);
+
     const fileSrc = [
       "edm",
       "Girlfriend",
@@ -256,6 +261,8 @@ function App() {
     } else {
       console.error("Failed to fetch video");
     }
+
+    setIsVideoFetching(false);
   };
 
   const { onClose } = useDisclosure();
@@ -281,6 +288,21 @@ function App() {
           </Center>
         </ModalBody>
       </Modal>
+      {
+        <Modal isOpen={isVideoFetching} size={"full"} bg={"none"}>
+          <ModalOverlay backdropFilter="blur(10px)" />
+          <ModalBody>
+            <Center h={"full"} w={"full"} p={"16dvh"}>
+              <Flex direction={"column"} justifyContent={"center"} gap={8}>
+                <Loading size={"50dvh"} color={"cream"} variant="circles" />
+                <Box color={"cream"} fontSize={"3rem"} textAlign={"center"}>
+                  Loading
+                </Box>
+              </Flex>
+            </Center>
+          </ModalBody>
+        </Modal>
+      }
       <h1>猫ミーム no 動画生成</h1>
       {/* <Button onClick={handleFetchClick}>fetch</Button> */}
       {fetchVideoURL}
