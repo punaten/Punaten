@@ -294,8 +294,16 @@ function App() {
           <ModalBody>
             <Center h={"full"} w={"full"} p={"16dvh"}>
               <Flex direction={"column"} justifyContent={"center"} gap={8}>
-                <Loading size={"50dvh"} color={"cream"} variant="circles" />
-                <Box color={"cream"} fontSize={"3rem"} textAlign={"center"}>
+                <Loading
+                  size={"50dvh"}
+                  color={["cinnamon", "cream"]}
+                  variant="circles"
+                />
+                <Box
+                  color={["cinnamon", "cream"]}
+                  fontSize={"3rem"}
+                  textAlign={"center"}
+                >
                   Loading
                 </Box>
               </Flex>
