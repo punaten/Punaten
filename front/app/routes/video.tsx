@@ -311,27 +311,35 @@ function App() {
           </ModalBody>
         </Modal>
       }
-      <h1>猫ミーム no 動画生成</h1>
-      {/* <Button onClick={handleFetchClick}>fetch</Button> */}
-      {fetchVideoURL}
-      <button onClick={handleClickGenerate}>動画をつくる</button>
-      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
-      {/* canvasを非表示に */}
-      <video
-        ref={videoRef}
-        controls
-        autoPlay
-        style={{ maxWidth: "80dvw", maxHeight: "80dvh" }}
-      ></video>{" "}
-      {/* video要素を追加 */}
-      {/* <video src={downloadUrl} controls style={{ maxWidth: '100%' }}></video> video要素を追加 */}
-      {downloadUrl && (
-        <Button onClick={handleDownload}>動画をダウンロード</Button>
-      )}
-      {downloadUrl && (
-        <Button onClick={handleUploadVideo}>タイムラインにアップロード</Button>
-      )}
-      <Button onClick={() => setBackgroundSrc("")}>画像を変更する</Button>
+      <Center>
+        <Box fontSize={"3rem"}>動画をつくる</Box>
+        {/* <Button onClick={handleFetchClick}>fetch</Button> */}
+        {fetchVideoURL}
+        <button onClick={handleClickGenerate}>動画をつくる</button>
+        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
+        {/* canvasを非表示に */}
+        <video
+          ref={videoRef}
+          controls
+          autoPlay
+          style={{
+            maxWidth: "80dvw",
+            maxHeight: "80dvh",
+            display: `${isLoading ? "block" : "none"}`,
+          }}
+        ></video>{" "}
+        {/* video要素を追加 */}
+        {/* <video src={downloadUrl} controls style={{ maxWidth: '100%' }}></video> video要素を追加 */}
+        {downloadUrl && (
+          <Button onClick={handleDownload}>動画をダウンロード</Button>
+        )}
+        {downloadUrl && (
+          <Button onClick={handleUploadVideo}>
+            タイムラインにアップロード
+          </Button>
+        )}
+        <Button onClick={() => setBackgroundSrc("")}>画像を変更する</Button>
+      </Center>
     </Box>
   );
 }
