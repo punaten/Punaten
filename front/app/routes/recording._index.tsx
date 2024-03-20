@@ -58,65 +58,83 @@ export default function Index() {
             visibility: miniPhase === 0 ? "hidden" : "visible",
           }}
         />
-        <Flex
-          w={"full"}
-          h={"full"}
-          justifyContent={"space-evenly"}
-          alignItems={"center"}
-          gap={4}
-        >
-          <Button
-            fontSize={18}
-            width={"full"}
-            py={6}
-            bg={["cinnamon", "cream-dark"]}
-            color={["cream-light", "dark"]}
-            onClick={startRecording}
+        {phase !== 4 ? (
+          <Flex
+            w={"full"}
+            h={"full"}
+            justifyContent={"space-evenly"}
+            alignItems={"center"}
+            gap={4}
           >
-            録画開始
-          </Button>
-          <Button
-            fontSize={18}
-            width={"full"}
-            py={6}
-            bg={["cinnamon", "cream-dark"]}
-            color={["cream-light", "dark"]}
-            onClick={restartRecording}
-          >
-            録り直し
-          </Button>
-          <Button
-            fontSize={18}
-            width={"full"}
-            py={6}
-            bg={["cinnamon", "cream-dark"]}
-            color={["cream-light", "dark"]}
-            onClick={cancelRecording}
-          >
-            キャンセル
-          </Button>
-          <Button
-            fontSize={18}
-            width={"full"}
-            py={6}
-            bg={["cinnamon", "cream-dark"]}
-            color={["cream-light", "dark"]}
-            onClick={finishRecording}
-          >
-            録画終了
-          </Button>
-        </Flex>
-      </Flex>{" "}
-      <Link to={`/video?${ArraytoQuery(catKind)}`}>動画を生成</Link>
+            {" "}
+            <Button
+              fontSize={18}
+              width={"full"}
+              py={6}
+              bg={["cinnamon", "cream-dark"]}
+              color={["cream-light", "dark"]}
+              onClick={startRecording}
+            >
+              録画開始
+            </Button>
+            <Button
+              fontSize={18}
+              width={"full"}
+              py={6}
+              bg={["cinnamon", "cream-dark"]}
+              color={["cream-light", "dark"]}
+              onClick={restartRecording}
+            >
+              録り直し
+            </Button>
+            <Button
+              fontSize={18}
+              width={"full"}
+              py={6}
+              bg={["cinnamon", "cream-dark"]}
+              color={["cream-light", "dark"]}
+              onClick={cancelRecording}
+            >
+              キャンセル
+            </Button>
+            <Button
+              fontSize={18}
+              width={"full"}
+              py={6}
+              bg={["cinnamon", "cream-dark"]}
+              color={["cream-light", "dark"]}
+              onClick={finishRecording}
+            >
+              録画終了
+            </Button>
+          </Flex>
+        ) : (
+          <Flex w={"full"} justifyContent={"center"}>
+            <Link to={`/video?${ArraytoQuery(catKind)}`}>
+              <Box
+                fontSize={18}
+                width={"full"}
+                py={3}
+                px={36}
+                bg={["cinnamon", "cream-dark"]}
+                color={["cream-light", "dark"]}
+                onClick={finishRecording}
+                w={"fit-content"}
+                rounded={8}
+              >
+                動画を生成
+              </Box>
+            </Link>
+          </Flex>
+        )}
+      </Flex>
       <Box position={"fixed"} left={10}>
         <Box>phase{phase}</Box>
         <Box>miniphase;{miniPhase}</Box>
         <Box>{remainingTime}</Box>
       </Box>
       <DisplayProgresses
-        currentTimer={
-          miniPhase ? videoLength - remainingTime : remainingTime / restTime
-        }
+        currentTimer={miniPhase ? videoLength - remainingTime : remainingTime}
         videoLength={videoLength}
         currentSet={phase}
         setNum={setNum}
