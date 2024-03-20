@@ -18,8 +18,8 @@ import { Form, Link } from "@remix-run/react";
 
 //string[]の配列をクエリに変換
 const ArraytoQuery = (array: string[]) => {
-  return array.map((value, index) => `array[${index}]=${value}`).join('&');
-}
+  return array.map((value, index) => `array[${index}]=${value}`).join("&");
+};
 
 export default function Index() {
   const {
@@ -35,7 +35,8 @@ export default function Index() {
     remainingTime,
     phase,
     miniPhase,
-    catKind, } = useRecording();
+    catKind,
+  } = useRecording();
 
   return (
     <Center h={"full"}>
@@ -105,7 +106,8 @@ export default function Index() {
             録画終了
           </Button>
         </Flex>
-      </Flex>
+      </Flex>{" "}
+      <Link to={`/video?${ArraytoQuery(catKind)}`}>動画を生成</Link>
       <Box position={"fixed"} left={10}>
         <Box>phase{phase}</Box>
         <Box>miniphase;{miniPhase}</Box>
@@ -122,5 +124,3 @@ export default function Index() {
     </Center>
   );
 }
-
-
