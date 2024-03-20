@@ -1,29 +1,26 @@
 import { Box, CircleProgress, CircleProgressLabel } from "@yamada-ui/react";
-// import CircleProgress from "./CircleProgress";
 
 const CircleTimerProgress = ({
-  currentTimer,
+  miniPhase,
+  remainingTime,
+  restTime,
   videoLength,
 }: {
-  currentTimer: number;
+  miniPhase: number;
+  remainingTime: number;
+  restTime: number;
   videoLength: number;
 }) => {
   let timerValue = 0;
-
-  // if(miniPhase){}
-
-  if (currentTimer >= 0) {
-    timerValue = Math.floor((currentTimer / videoLength) * 100);
-  } else if (currentTimer < -1500) {
-    timerValue = 100;
+  if (miniPhase === 0) {
+    if (remainingTime < (restTime * 3) / 4) {
+      timerValue = 100;
+    } else {
+      timerValue = 0;
+    }
   } else {
-    timerValue = 0;
+    timerValue = (remainingTime / videoLength) * 100;
   }
-
-  const intervalCount =
-    -3000 < currentTimer && currentTimer < 0
-      ? `${Math.floor(-currentTimer / 1000) + 1}`
-      : "";
 
   return (
     <Box opacity={20}>
@@ -34,12 +31,7 @@ const CircleTimerProgress = ({
         thickness={4}
         size={60}
         isAnimation={false}
-      >
-        <CircleProgressLabel color={["cinnamon", "caramel"]}>
-          {intervalCount}
-        </CircleProgressLabel>
-      </CircleProgress>
-      {/* <CircleProgress value={timerValue} /> */}
+      />
     </Box>
   );
 };

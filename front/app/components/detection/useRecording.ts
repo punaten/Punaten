@@ -3,8 +3,8 @@ import { usePoseDetector } from '~/components/detection/usePoseDetector';
 import { useCamera } from './useCamera';
 import { useClustering } from './useClustering';
 const useRecording = () => {
-    const videoLength = 4000;
-    const restTime = 2000;
+    const videoLength = 8000;
+    const restTime = 4000;
     const setNum = 3;
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);

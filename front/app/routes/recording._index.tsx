@@ -134,9 +134,11 @@ export default function Index() {
         <Box>{remainingTime}</Box>
       </Box>
       <DisplayProgresses
-        currentTimer={miniPhase ? videoLength - remainingTime : remainingTime}
+        phase={phase}
+        miniPhase={miniPhase}
+        remainingTime={remainingTime}
+        restTime={restTime}
         videoLength={videoLength}
-        currentSet={phase}
         setNum={setNum}
       />
     </Center>
