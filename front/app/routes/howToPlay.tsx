@@ -1,4 +1,4 @@
-import { Button, Center, Container, Heading, Text } from "@yamada-ui/react"
+import { Button, Center, Container, Text } from "@yamada-ui/react"
 import { Link } from "@remix-run/react"
 
 const HowToPlay = () => {
@@ -8,11 +8,11 @@ const HowToPlay = () => {
                 <Text as={"h1"} fontSize={"3rem"} w={"fit-content"} m={"auto"} color={["cinnamon", "caramel"]}>遊び方</Text>
                 <Center>
                     <Text className="description" text={"2rem"} color={["cinnamon", "caramel"]}>
-                        Startボタンを押すと20秒の録画が始まります。<br />
-                        全力で漢字で表現してください。<br />
-                        そして全力で漢字ミーの意図を汲んでください。<br />
-                        20秒経過すると自動的に録画が終了し、漢字ミー<br />
-                        の生放が始まります。
+                    Startボタンを押すと30秒の録画が始まります。<br />
+                    全力で猫ミームの真似をしてください。<br />
+                    全力で踊ってください。<br />
+                    30秒経過すると自動的に録画が終了し、猫ミーム<br />
+                    の生成が始まります。
                     </Text>
                 </Center>
             </Container>
