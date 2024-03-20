@@ -37,6 +37,11 @@ export const useClustering = () => {
         right: { x: 0, y: 0 },
       };
       const ids: number[] = [];
+      //人数分の出演カウント
+      //キーがidで、valueが出現回数
+      const idCount: { [key: number]: number } = {};
+
+      // let idCoount: number[] = [];
       let overHandCount: number = 0;
 
       const checkHandAndNose = (
@@ -89,11 +94,18 @@ export const useClustering = () => {
               break;
           }
         });
-        if (id && !ids.includes(id)) ids.push(id);
+        if (id) {
+          //keyがidのvalueを1増やす
+          idCount[id] = (idCount[id] || 0) + 1;
+        }
         checkHandAndNose(leftHand, rightHand, nose);
       });
 
       const num = data.length - 1;
+      //idCountの中で2番目に多いidの出現回数を取得
+      const secondIdCoount = Object.values(idCount).sort((a, b) => b - a)[1];
+
+      console.log(secondIdCoount);
 
       return {
         leftHand: {
@@ -112,8 +124,8 @@ export const useClustering = () => {
             speed: sumValue.right.y / num,
           },
         },
-        idCount: ids.length,
-        overHandCount: overHandCount,
+        secondIdCoount,
+        overHandCount,
       };
     };
 
@@ -122,15 +134,15 @@ export const useClustering = () => {
 
     const resultNum = wasmModule
       ? wasmModule.clustering(
-          result.leftHand.x.speed,
-          result.leftHand.y.speed,
-          result.rightHand.x.speed,
-          result.rightHand.y.speed,
-          result.idCount,
-          result.overHandCount
-        )
+        result.leftHand.x.speed,
+        result.leftHand.y.speed,
+        result.rightHand.x.speed,
+        result.rightHand.y.speed,
+        result.secondIdCoount,
+        result.overHandCount
+      )
       : -1;
-//"edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"
+    //"edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"
     const numToNekoType = (result: number) => {
       switch (result) {
         case 0:

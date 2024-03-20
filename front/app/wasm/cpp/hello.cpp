@@ -3,10 +3,10 @@
 extern "C"
 {
     EMSCRIPTEN_KEEPALIVE
-    float clustering(float leftHandXSpeed, float leftHandYSpeed, float rightHandXSpeed, float rightHandYSpeed, int idCount, int overHandCount)
+    float clustering(float leftHandXSpeed, float leftHandYSpeed, float rightHandXSpeed, float rightHandYSpeed, int secondIdCount, int overHandCount)
     {
         float speedValue = leftHandXSpeed * 3 + rightHandXSpeed * 3 + leftHandYSpeed + rightHandYSpeed;
-        if (idCount >= 2)
+        if (secondIdCount >= 250)
         {
             return 0;
         }
