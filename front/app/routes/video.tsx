@@ -1,3 +1,4 @@
+import { useSearchParams } from '@remix-run/react';
 import { Button } from '@yamada-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -13,50 +14,26 @@ function App() {
     const recordedChunksRef = useRef<Blob[]>([]);
     // MP3データを保存するためのuseState
     const [audioData, setAudioData] = useState<ArrayBuffer>();
-    const fetchFiles = async () => {
-        // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
-        let suffix = ""
-        let mp3Suffix = ""
-        for (let i = 0; i < 4; i++) {
-            const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)];
 
-            // 動画ファイル名をAPIに送信するための形式に整形
-            const videoSrc = videoAndAudioFileName + ".mp4"; // ここでは1つのファイル名を使用
-            const mp3Src = videoAndAudioFileName + ".mp3";
-            suffix += "/" + videoSrc;
-            mp3Suffix += "/" + mp3Src;
-        }
-
-        // APIリクエストの送信
-        const response = await fetch('https://punaten-video-uvb7exztca-an.a.run.app/combine' + suffix, {
-            method: 'GET', // GETメソッドを使用
-        });
-
-        const res = await fetch("https://punaten-video-uvb7exztca-an.a.run.app/combine/mp3" + mp3Suffix, {
-            method: 'GET', // GETメソッドを使用
-        })
-
-        // レスポンスをArrayBufferとして取得
-        const data = await res.arrayBuffer();
-        // 取得したArrayBufferを状態に保存
-        setAudioData(data);
-
-        console.log(response);
-        if (response.ok) {
-            const blob = await response.blob(); // レスポンスをBlobとして取得
-            const videoURL = URL.createObjectURL(blob); // BlobからURLを生成
-            setFetchVideoURL(videoURL); // video要素のsrcに設定
-        } else {
-            console.error('Failed to fetch video');
-        }
-    };
-
-
-    // useEffect(() => {
-
-
-    //     fetchFiles();
-    // }, []);
+    const [searchParams] = useSearchParams();
+    const [arrayBuffer, setArrayBuffer] = useState<ArrayBuffer>();
+    const [blob, setBlob] = useState<Blob>();
+  
+    useEffect(() => {
+      // クエリパラメータからエンコードされたデータを取得
+      const encodedArrayBuffer = searchParams.get('arrayBuffer');
+      const encodedBlob = searchParams.get('blob');
+  
+      // デコードして状態にセット
+      if (encodedArrayBuffer) {
+        const decodedArrayBuffer = Uint8Array.from(atob(encodedArrayBuffer), c => c.charCodeAt(0)).buffer;
+        setArrayBuffer(decodedArrayBuffer);
+      }
+      if (encodedBlob) {
+        const decodedBlob = new Blob([Uint8Array.from(atob(encodedBlob), c => c.charCodeAt(0))]);
+        setBlob(decodedBlob);
+      }
+    }, [searchParams]);
 
     const handleBackgroundFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -219,14 +196,14 @@ function App() {
             });
     }
 
-    const handleFetchClick = () => {
-        fetchFiles();
-    }
+    // const handleFetchClick = () => {
+    //     fetchFiles();
+    // }
 
     return (
         <div className="app">
             <h1>Chroma Key Compositing</h1>
-            <Button onClick={handleFetchClick}>fetch</Button>
+            {/* <Button onClick={handleFetchClick}>fetch</Button> */}
             {fetchVideoURL}
             <div>
                 <input type="file" accept="image/*" onChange={handleBackgroundFile} />

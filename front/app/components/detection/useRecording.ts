@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { usePoseDetector } from "~/components/detection/usePoseDetector";
-import { useCamera } from "./useCamera";
-import { useClustering } from "./useClustering";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { usePoseDetector } from '~/components/detection/usePoseDetector';
+import { useCamera } from './useCamera';
+import { Pose } from '@tensorflow-models/pose-detection/dist/types';
+import { useClustering } from './useClustering';
 const useRecording = () => {
   const videoLength = 8000;
   const restTime = 4000;
@@ -9,21 +10,29 @@ const useRecording = () => {
   const webcamRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const maxPhase = 3;
-  const [phase, setPhase] = useState<number>(0);
-  const [miniPhase, setMiniPhase] = useState<number>(0);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [remainingTime, setRemainingTime] = useState<number>(0);
-  const { isCameraOn, startCamera, stopCamera } = useCamera(webcamRef);
-  const {
-    isDetectionOn,
-    detectedPoses,
-    handleStartDetection,
-    handleStopDetection,
-  } = usePoseDetector(webcamRef, canvasRef, isCameraOn);
-  const { getNekoType } = useClustering();
-  const [timeCounter, setTimeCount] = useState<number>(-3000);
-  //セットカウンター 今何セット目かをカウント
+    const maxPhase = 3;
+    const [phase, setPhase] = useState<number>(0);
+    const [miniPhase, setMiniPhase] = useState<number>(0);
+    const [isRecording, setIsRecording] = useState<boolean>(false);
+    const [remainingTime, setRemainingTime] = useState<number>(0);
+    const { isCameraOn, startCamera, stopCamera } = useCamera(webcamRef)
+    const [ catKind, setCatKind ] = useState<string[]>([]); // 猫の種類
+    const {
+        isDetectionOn,
+        detectedPoses,
+        handleStartDetection,
+        handleStopDetection,
+    } = usePoseDetector(webcamRef, canvasRef, isCameraOn);
+    const [timeCounter, setTimeCount] = useState<number>(-3000);
+    const { nekoType } = useClustering(detectedPoses, timeCounter, setCatKind);
+    //セットカウンター 今何セット目かをカウント
+    
+    const startRecording = useCallback(() => {
+        setIsRecording(true);
+        setPhase(1);
+        setMiniPhase(0); // 撮影を開始するためにミニフェーズを1に設定
+        setRemainingTime(restTime); // 撮影時間を設定
+    }, []);
 
   const startRecording = useCallback(() => {
     setIsRecording(true);
