@@ -3,8 +3,8 @@ import { usePoseDetector } from '~/components/detection/usePoseDetector';
 import { useCamera } from './useCamera';
 import { useClustering } from './useClustering';
 const useRecording = () => {
-    const videoLength = 8000;
-    const restTime = 4000;
+    const videoLength = 4000;
+    const restTime = 2000;
     const setNum = 3;
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -67,7 +67,7 @@ const useRecording = () => {
                     setRemainingTime(restTime); // 休憩時間を設定
                 } else if (phase === maxPhase && miniPhase === 1) {
                     setIsRecording(false); // 撮影を完了
-                    setPhase(0); // フェーズをリセット
+                    setPhase(4); // フェーズをリセット
                     setMiniPhase(0); // ミニフェーズをリセット
                 } else if (miniPhase === 1) {
                     // 撮影中のフェーズが終了
@@ -112,7 +112,7 @@ const useRecording = () => {
             stopCamera();
             handleStopDetection();
             if (detectedPoses.length > 0) {
-                const nekoType = getNekoType(detectedPoses).then((nekoType) => {
+                getNekoType(detectedPoses).then((nekoType) => {
                     console.log(nekoType);
                     setCatKind((prev) => [...prev, nekoType]);
                 })
