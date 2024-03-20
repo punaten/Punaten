@@ -9,31 +9,22 @@ function App() {
     const [blobData, setBlobData] = useState<Blob>();
     const canvasRef = useRef<HTMLCanvasElement>(null); // canvasへの参照
     const videoRef = useRef<HTMLVideoElement>(null); // videoタグへの参照を追加
-    const [fetchVideoURL, setFetchVideoURL] = useState<string>('https://storage.googleapis.com/punaten/5c46c712-1ff2-46f1-85f1-488430dc1f74video.webm');
+    const [fetchVideoURL, setFetchVideoURL] = useState<string>('');
     const [downloadUrl, setDownloadUrl] = useState<string>(''); // ダウンロード用のURL
     const recordedChunksRef = useRef<Blob[]>([]);
     // MP3データを保存するためのuseState
     const [audioData, setAudioData] = useState<ArrayBuffer>();
 
     const [searchParams] = useSearchParams();
-    const [arrayBuffer, setArrayBuffer] = useState<ArrayBuffer>();
-    const [blob, setBlob] = useState<Blob>();
-  
-    useEffect(() => {
-      // クエリパラメータからエンコードされたデータを取得
-      const encodedArrayBuffer = searchParams.get('arrayBuffer');
-      const encodedBlob = searchParams.get('blob');
-  
-      // デコードして状態にセット
-      if (encodedArrayBuffer) {
-        const decodedArrayBuffer = Uint8Array.from(atob(encodedArrayBuffer), c => c.charCodeAt(0)).buffer;
-        setArrayBuffer(decodedArrayBuffer);
-      }
-      if (encodedBlob) {
-        const decodedBlob = new Blob([Uint8Array.from(atob(encodedBlob), c => c.charCodeAt(0))]);
-        setBlob(decodedBlob);
-      }
-    }, [searchParams]);
+    // const [ arrayValues, setArrayValues ] = useState<string[]>([]);
+    const arrayValues: string[] = [];
+
+    // クエリパラメータから配列を取得
+    for (const [key, value] of searchParams.entries()) {
+        if (key.startsWith('array[')) {
+            arrayValues.push(value);
+        }
+    }
 
     const handleBackgroundFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -43,6 +34,7 @@ function App() {
     };
 
     const createChromaKeyComposite = async () => {
+        debugger
         if (!canvasRef.current || !videoRef.current) return;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -61,8 +53,6 @@ function App() {
                 resolve(true);
             };
         });
-
-
 
         // video要素を設定
         const video = document.createElement('video');
@@ -161,7 +151,9 @@ function App() {
             alert('背景画像を選択してください');
             return;
         }
-        createChromaKeyComposite();
+        fetchFiles().then(() => {
+            createChromaKeyComposite();
+        })
     }
 
     const handleDownload = () => {
@@ -196,23 +188,57 @@ function App() {
             });
     }
 
-    // const handleFetchClick = () => {
-    //     fetchFiles();
-    // }
+    const fetchFiles = async () => {
+        // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
+        const fileSrc = ["edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"];
+        let suffix = "";
+        let mp3Suffix = "";
+        arrayValues.forEach((value) => {
+            suffix += "/" + value + ".mp4";
+            mp3Suffix += "/" + value + ".mp3";
+        })
+
+        // APIリクエストの送信
+        const response = await fetch('https://punaten-video-uvb7exztca-an.a.run.app/combine' + suffix, {
+            method: 'GET', // GETメソッドを使用
+        });
+
+        const res = await fetch("https://punaten-video-uvb7exztca-an.a.run.app/combine/mp3" + mp3Suffix, {
+            method: 'GET', // GETメソッドを使用
+        })
+
+        // レスポンスをArrayBufferとして取得
+        const data = await res.arrayBuffer();
+        // 取得したArrayBufferを状態に保存
+        setAudioData(data);
+
+        console.log(response);
+        if (response.ok) {
+            const blob = await response.blob(); // レスポンスをBlobとして取得
+            const videoURL = URL.createObjectURL(blob); // BlobからURLを生成
+            setFetchVideoURL(videoURL); // video要素のsrcに設定
+        } else {
+            console.error('Failed to fetch video');
+        }
+    };
+
+    const handleFetchClick = () => {
+        fetchFiles();
+    }
 
     return (
-        <div className="app">
-            <h1>Chroma Key Compositing</h1>
+        <div className="app" style={{margin:"10rem"}}>
+            <h1>猫ミーム no 動画生成</h1>
             {/* <Button onClick={handleFetchClick}>fetch</Button> */}
             {fetchVideoURL}
             <div>
                 <input type="file" accept="image/*" onChange={handleBackgroundFile} />
             </div>
-            <button onClick={handleClickGenerate}>生成</button>
+            <button onClick={handleClickGenerate}>動画をつくる</button>
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas> {/* canvasを非表示に */}
             <video ref={videoRef} controls autoPlay style={{ maxWidth: '100%' }}></video> {/* video要素を追加 */}
-            {downloadUrl && <Button onClick={handleDownload}>download</Button>}
-            {downloadUrl && <Button onClick={handleUploadVideo}>Upload</Button>}
+            {downloadUrl && <Button onClick={handleDownload}>動画をダウンロード</Button>}
+            {downloadUrl && <Button onClick={handleUploadVideo}>タイムラインにアップロード</Button>}
         </div>
     );
 }

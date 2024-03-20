@@ -3,18 +3,23 @@ import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
 import { redirect } from "@remix-run/cloudflare";
 import { ActionFunction } from "@remix-run/cloudflare";
-import { Form } from "@remix-run/react";
+import { Form, Link } from "@remix-run/react";
 
-export const action: ActionFunction = async () => {
-  const { arrayBuffer, blob } = await fetchFiles(); // データ取得
+// export const action: ActionFunction = async () => {
+//   const { arrayBuffer, blob } = await fetchFiles(); // データ取得
 
-  // ArrayBufferとBlobをBase64エンコード
-  const encodedArrayBuffer = Buffer.from(arrayBuffer).toString('base64');
-  const encodedBlob = Buffer.from(await blob.arrayBuffer()).toString('base64');
+//   // ArrayBufferとBlobをBase64エンコード
+//   const encodedArrayBuffer = Buffer.from(arrayBuffer).toString('base64');
+//   const encodedBlob = Buffer.from(await blob.arrayBuffer()).toString('base64');
 
-  // リダイレクトとデータの受け渡し
-  return redirect(`/video?arrayBuffer=${encodedArrayBuffer}&blob=${encodedBlob}`);
-};
+//   // リダイレクトとデータの受け渡し
+//   return redirect(`/video?arrayBuffer=${encodedArrayBuffer}&blob=${encodedBlob}`);
+// };
+
+//string[]の配列をクエリに変換
+const ArraytoQuery = (array: string[]) => {
+  return array.map((value, index) => `array[${index}]=${value}`).join('&');
+}
 
 export default function Index() {
   const { webcamRef,
@@ -30,7 +35,8 @@ export default function Index() {
     finishRecording,
     remainingTime,
     phase,
-    miniPhase } = useRecording();
+    miniPhase,
+    catKind, } = useRecording();
 
   return (
     <div>
@@ -61,6 +67,7 @@ export default function Index() {
           <Button bg={"cinnamon"} onClick={finishRecording}>
             録画終了
           </Button>
+          <Link to={`/video?${ArraytoQuery(catKind)}`}>動画を生成</Link>
         </div>
         <DisplayProgresses
           currentTimer={videoLength - remainingTime * 2}
@@ -79,8 +86,8 @@ export default function Index() {
         {remainingTime}
       </Box>
       <Form method="post">
-            <button type="submit">Submit</button>
-        </Form>
+        <button type="submit">Submit</button>
+      </Form>
       {/* <Box>
         {phase}:{timeCounter}
       </Box> */}
@@ -88,36 +95,4 @@ export default function Index() {
   );
 }
 
-const fetchFiles = async () => {
-  // ランダムに動画ファイル名を複数選択（ここでは仮に1つだけ選択しています）
-  const fileSrc = ["edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"];
-  let suffix = "";
-  let mp3Suffix = "";
-  for (let i = 0; i < 4; i++) {
-      const videoAndAudioFileName = fileSrc[Math.floor(Math.random() * fileSrc.length)];
 
-      // 動画ファイル名をAPIに送信するための形式に整形
-      const videoSrc = videoAndAudioFileName + ".mp4"; // ここでは1つのファイル名を使用
-      const mp3Src = videoAndAudioFileName + ".mp3";
-      suffix += "/" + videoSrc;
-      mp3Suffix += "/" + mp3Src;
-  }
-
-  // APIリクエストの送信
-  const response = await fetch('https://punaten-video-uvb7exztca-an.a.run.app/combine' + suffix, {
-      method: 'GET', // GETメソッドを使用
-  });
-
-  const res = await fetch("https://punaten-video-uvb7exztca-an.a.run.app/combine/mp3" + mp3Suffix, {
-      method: 'GET', // GETメソッドを使用
-  });
-
-  // レスポンスを検証
-  if (response.ok && res.ok) {
-      const blob = await response.blob(); // レスポンスをBlobとして取得
-      const arrayBuffer = await res.arrayBuffer(); // レスポンスをArrayBufferとして取得
-      return { blob, arrayBuffer };
-  } else {
-      throw new Error('Failed to fetch files');
-  }
-};

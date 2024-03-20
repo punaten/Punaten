@@ -130,7 +130,7 @@ export const useClustering = () => {
           result.overHandCount
         )
       : -1;
-
+//"edm", "Girlfriend", "happy_happy", "shikarareru", "yonezu_happy"
     const numToNekoType = (result: number) => {
       switch (result) {
         case 0:
