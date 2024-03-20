@@ -10,6 +10,8 @@ const CircleTimerProgress = ({
 }) => {
   let timerValue = 0;
 
+  // if(miniPhase){}
+
   if (currentTimer >= 0) {
     timerValue = Math.floor((currentTimer / videoLength) * 100);
   } else if (currentTimer < -1500) {

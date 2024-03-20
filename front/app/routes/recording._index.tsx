@@ -1,8 +1,4 @@
-import { Pose } from "@tensorflow-models/pose-detection";
 import { Box, Button, Center, Flex } from "@yamada-ui/react";
-import { useRef, useState, useEffect } from "react";
-import { useCamera } from "~/components/detection/useCamera";
-import { usePoseDetector } from "~/components/detection/usePoseDetector";
 import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
 
@@ -10,11 +6,9 @@ export default function Index() {
   const {
     videoRef,
     canvasRef,
-    isDetectionOn,
-    isCameraOn,
     videoLength,
+    restTime,
     setNum,
-    timeCounter,
     startRecording,
     restartRecording,
     cancelRecording,
@@ -99,7 +93,9 @@ export default function Index() {
         <Box>{remainingTime}</Box>
       </Box>
       <DisplayProgresses
-        currentTimer={videoLength - remainingTime * 2}
+        currentTimer={
+          miniPhase ? videoLength - remainingTime : remainingTime / restTime
+        }
         videoLength={videoLength}
         currentSet={phase}
         setNum={setNum}
