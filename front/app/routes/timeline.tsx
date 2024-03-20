@@ -37,18 +37,32 @@ export default function App() {
     }, []);
 
   return (
-    <div>
-      <h1>Time Line</h1>
-      <ul>
-        {timeline.map((t) => (
-          // Using `t.id` as key for more stability compared to index
-          <li key={t.id}>
-            <video src={"https://punaten.storage.googleapis.com/" + t.name} controls style={{width:400}}></video>
-            <p>{t.created_at}</p>
-          </li>
-        ))}
-      </ul>
-      {/* <Button onClick={getTimeline}>Get Timeline</Button> */}
-    </div>
+    <div style={{
+      maxWidth: '800px',
+      margin: 'auto',
+      padding: '20px',
+      textAlign: 'center',
+  }}>
+      <h1 style={{ marginBottom: '40px' }}>Time Line</h1>
+      <div>
+          <ul style={{ listStyleType: 'none', padding: 0 }}>
+              {timeline.map((t) => (
+                  <li key={t.id} style={{
+                      margin: '10px 0',
+                      padding: '20px',
+                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                  }}>
+                      <video src={"https://punaten.storage.googleapis.com/" + t.name} controls style={{ width: '100%', maxWidth: '400px', borderRadius: '10px' }}></video>
+                      <p style={{ marginTop: '10px' }}>{t.created_at}</p>
+                  </li>
+              ))}
+          </ul>
+      </div>
+  </div>
+  
   );
 }
