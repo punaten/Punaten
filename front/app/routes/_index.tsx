@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { Center, Flex, Link, Motion } from "@yamada-ui/react";
+import LinkToTimeLine from "~/components/LinkToTimeLIne";
 export const meta: MetaFunction = () => {
   return [
     { title: "ダンスDE猫ミーム" },
@@ -43,6 +44,9 @@ export default function Index() {
         </Center>
         <Center fontSize={48} pt={10}>
           - Click to Start -
+        </Center>
+        <Center>
+          <LinkToTimeLine />
         </Center>
       </Flex>
     </Center>
