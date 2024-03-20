@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePoseDetector } from '~/components/detection/usePoseDetector';
 import { useCamera } from './useCamera';
-import { Pose } from '@tensorflow-models/pose-detection/dist/types';
 import { useClustering } from './useClustering';
 const useRecording = () => {
     const videoLength = 8000;
     const restTime = 4000;
     const setNum = 3;
-    const webcamRef = useRef<HTMLVideoElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const maxPhase = 3;
@@ -15,14 +14,14 @@ const useRecording = () => {
     const [miniPhase, setMiniPhase] = useState<number>(0);
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [remainingTime, setRemainingTime] = useState<number>(0);
-    const { isCameraOn, startCamera, stopCamera } = useCamera(webcamRef)
+    const { isCameraOn, startCamera, stopCamera } = useCamera(videoRef)
     const [catKind, setCatKind] = useState<string[]>([]); // 猫の種類
     const {
         isDetectionOn,
         detectedPoses,
         handleStartDetection,
         handleStopDetection,
-    } = usePoseDetector(webcamRef, canvasRef, isCameraOn);
+    } = usePoseDetector(videoRef, canvasRef, isCameraOn);
     const [timeCounter, setTimeCount] = useState<number>(-3000);
     const { getNekoType } = useClustering();
     //セットカウンター 今何セット目かをカウント
@@ -68,7 +67,7 @@ const useRecording = () => {
                     setRemainingTime(restTime); // 休憩時間を設定
                 } else if (phase === maxPhase && miniPhase === 1) {
                     setIsRecording(false); // 撮影を完了
-                    setPhase(0); // フェーズをリセット
+                    setPhase(4); // フェーズをリセット
                     setMiniPhase(0); // ミニフェーズをリセット
                 } else if (miniPhase === 1) {
                     // 撮影中のフェーズが終了
@@ -113,7 +112,7 @@ const useRecording = () => {
             stopCamera();
             handleStopDetection();
             if (detectedPoses.length > 0) {
-                const nekoType = getNekoType(detectedPoses).then((nekoType) => {
+                getNekoType(detectedPoses).then((nekoType) => {
                     console.log(nekoType);
                     setCatKind((prev) => [...prev, nekoType]);
                 })
@@ -123,7 +122,7 @@ const useRecording = () => {
     }, [phase, miniPhase]);
 
     return {
-        webcamRef,
+        videoRef,
         canvasRef,
         isCameraOn,
         isDetectionOn,
@@ -131,6 +130,7 @@ const useRecording = () => {
         videoLength,
         setNum,
         timeCounter,
+        restTime,
         startRecording,
         restartRecording,
         cancelRecording,

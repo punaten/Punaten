@@ -3,14 +3,18 @@ import CircleTimerProgress from "./CircleTimerProgress";
 import DotSetProgress from "./DotSetProgress";
 
 const DisplayProgresses = ({
-  currentTimer,
+  phase,
+  miniPhase,
+  remainingTime,
+  restTime,
   videoLength,
-  currentSet,
   setNum,
 }: {
-  currentTimer: number;
+  phase: number;
+  miniPhase: number;
+  remainingTime: number;
+  restTime: number;
   videoLength: number;
-  currentSet: number;
   setNum: number;
 }) => {
   return (
@@ -23,10 +27,12 @@ const DisplayProgresses = ({
       direction={"column"}
     >
       <CircleTimerProgress
-        currentTimer={currentTimer}
+        miniPhase={miniPhase}
+        remainingTime={remainingTime}
+        restTime={restTime}
         videoLength={videoLength}
       />
-      <DotSetProgress currentSet={currentSet} setNum={setNum} />
+      <DotSetProgress currentSet={phase} setNum={setNum} />
     </Flex>
   );
 };
