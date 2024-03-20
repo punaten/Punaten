@@ -1,10 +1,25 @@
-import { Pose } from "@tensorflow-models/pose-detection";
-import { Box, Button, Center, Flex } from "@yamada-ui/react";
-import { useRef, useState, useEffect } from "react";
-import { useCamera } from "~/components/detection/useCamera";
-import { usePoseDetector } from "~/components/detection/usePoseDetector";
+import { Box, Button, Center } from "@yamada-ui/react";
 import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
+import { redirect } from "@remix-run/cloudflare";
+import { ActionFunction } from "@remix-run/cloudflare";
+import { Form, Link } from "@remix-run/react";
+
+// export const action: ActionFunction = async () => {
+//   const { arrayBuffer, blob } = await fetchFiles(); // データ取得
+
+//   // ArrayBufferとBlobをBase64エンコード
+//   const encodedArrayBuffer = Buffer.from(arrayBuffer).toString('base64');
+//   const encodedBlob = Buffer.from(await blob.arrayBuffer()).toString('base64');
+
+//   // リダイレクトとデータの受け渡し
+//   return redirect(`/video?arrayBuffer=${encodedArrayBuffer}&blob=${encodedBlob}`);
+// };
+
+//string[]の配列をクエリに変換
+const ArraytoQuery = (array: string[]) => {
+  return array.map((value, index) => `array[${index}]=${value}`).join('&');
+}
 
 export default function Index() {
   const { webcamRef,
@@ -20,7 +35,8 @@ export default function Index() {
     finishRecording,
     remainingTime,
     phase,
-    miniPhase } = useRecording();
+    miniPhase,
+    catKind, } = useRecording();
 
   return (
     <div>
@@ -51,6 +67,7 @@ export default function Index() {
           <Button bg={"cinnamon"} onClick={finishRecording}>
             録画終了
           </Button>
+          <Link to={`/video?${ArraytoQuery(catKind)}`}>動画を生成</Link>
         </div>
         <DisplayProgresses
           currentTimer={videoLength - remainingTime * 2}
@@ -68,9 +85,14 @@ export default function Index() {
       <Box>
         {remainingTime}
       </Box>
+      <Form method="post">
+        <button type="submit">Submit</button>
+      </Form>
       {/* <Box>
         {phase}:{timeCounter}
       </Box> */}
     </div>
   );
 }
+
+
