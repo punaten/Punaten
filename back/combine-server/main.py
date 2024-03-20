@@ -24,16 +24,15 @@ app.add_middleware(
 async def index():
     return {'message': 'Hello World'}
 
-@app.get('/combine/{VIDEO_1_PATH}/{VIDEO_2_PATH}/{VIDEO_3_PATH}/{VIDEO_4_PATH}')
-def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDEO_4_PATH: str):
+@app.get('/combine/{VIDEO_1_PATH}/{VIDEO_2_PATH}/{VIDEO_3_PATH}')
+def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str):
     # 動画ファイルを読み込む
     clip1 = VideoFileClip("./video/" +  VIDEO_1_PATH)
     clip2 = VideoFileClip("./video/" + VIDEO_2_PATH)
     clip3 = VideoFileClip("./video/" + VIDEO_3_PATH)
-    clip4 = VideoFileClip("./video/" + VIDEO_4_PATH)
     
     # 動画を結合する
-    final_clip = concatenate_videoclips([clip1, clip2, clip3, clip4])
+    final_clip = concatenate_videoclips([clip1, clip2, clip3])
     
     # 結合した動画をファイルに出力する
     output_path = './combined_video.mp4'
@@ -42,8 +41,8 @@ def combine_videos(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDE
     # FastAPIのFileResponseを使用して結合した動画ファイルをクライアントに送信
     return FileResponse(output_path)
 
-@app.get('/combine/mp3/{VIDEO_1_PATH}/{VIDEO_2_PATH}/{VIDEO_3_PATH}/{VIDEO_4_PATH}')
-def combine_mp3(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDEO_4_PATH: str):
+@app.get('/combine/mp3/{VIDEO_1_PATH}/{VIDEO_2_PATH}/{VIDEO_3_PATH}')
+def combine_mp3(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str):
     # 曲1の読み込み
     af1 = AudioSegment.from_mp3("./mp3/" +  VIDEO_1_PATH)
 
@@ -53,11 +52,9 @@ def combine_mp3(VIDEO_1_PATH: str, VIDEO_2_PATH: str, VIDEO_3_PATH: str, VIDEO_4
     # 曲3の読み込み
     af3 = AudioSegment.from_mp3("./mp3/" + VIDEO_3_PATH)
 
-    # 曲4の読み込み
-    af4 = AudioSegment.from_mp3("./mp3/" + VIDEO_4_PATH)
 
     # 4つの曲を連結する
-    af = af1 + af2 + af3 + af4 
+    af = af1 + af2 + af3
     af.export("concat.mp3", format="mp3")
 
     return FileResponse("concat.mp3")
