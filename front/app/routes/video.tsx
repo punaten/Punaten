@@ -13,6 +13,7 @@ import {
   useDisclosure,
 } from "@yamada-ui/react";
 import React, { useEffect, useRef, useState } from "react";
+import LinkToTimeLine from "~/components/LinkToTimeLIne";
 
 function App() {
   const [fileSrc, setFileSrc] = useState<string[]>([
@@ -288,7 +289,7 @@ function App() {
           </Center>
         </ModalBody>
       </Modal>
-      {
+      {isImageSelected && (
         <Modal isOpen={isVideoFetching} size={"full"} bg={"none"}>
           <ModalOverlay backdropFilter="blur(10px)" />
           <ModalBody>
@@ -310,33 +311,59 @@ function App() {
             </Center>
           </ModalBody>
         </Modal>
-      }
-      <Center>
-        <Box fontSize={"3rem"}>動画をつくる</Box>
-        {/* <Button onClick={handleFetchClick}>fetch</Button> */}
-        <Box display={"none"}>{fetchVideoURL}</Box>
-        <button onClick={handleClickGenerate}>動画をつくる</button>
-        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
-        {/* canvasを非表示に */}
-        <video
-          ref={videoRef}
-          controls
-          autoPlay
-          style={{
-            maxWidth: "80dvw",
-            maxHeight: "80dvh",
-            display: `${isLoading ? "block" : "none"}`,
-          }}
-        ></video>{" "}
-        {downloadUrl && (
-          <Button onClick={handleDownload}>動画をダウンロード</Button>
-        )}
-        {downloadUrl && (
-          <Button onClick={handleUploadVideo}>
-            タイムラインにアップロード
+      )}
+      <Center p={12} h={"100dvh"}>
+        <Flex direction={"column"} alignContent={"space-evenly"} h={"full"}>
+          <Box fontSize={"3rem"}>動画をつくる</Box>
+          {/* <Button onClick={handleFetchClick}>fetch</Button> */}
+          <Box display={"none"}>{fetchVideoURL}</Box>
+          <Button
+            fontSize={18}
+            width={"full"}
+            py={6}
+            bg={["cinnamon", "cream-dark"]}
+            color={["cream-light", "dark"]}
+            onClick={handleClickGenerate}
+          >
+            動画を生成する
           </Button>
-        )}
-        <Button onClick={() => setBackgroundSrc("")}>画像を変更する</Button>
+          <Button
+            fontSize={18}
+            width={"full"}
+            py={6}
+            borderWidth={4}
+            borderBlockStyle={"solid"}
+            borderColor={["cinnamon", "cream-dark"]}
+            bg={["cream-light", "dark"]}
+            color={["cinnamon", "cream-dark"]}
+            onClick={() => setBackgroundSrc("")}
+          >
+            画像を変更する
+          </Button>
+          <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
+          {/* canvasを非表示に */}
+          <video
+            ref={videoRef}
+            controls
+            autoPlay
+            style={{
+              maxWidth: "80dvw",
+              maxHeight: "80dvh",
+              display: `${isLoading ? "block" : "none"}`,
+            }}
+          ></video>{" "}
+          {downloadUrl && (
+            <Button onClick={handleDownload}>動画をダウンロード</Button>
+          )}
+          {downloadUrl && (
+            <Box>
+              <Button onClick={handleUploadVideo}>
+                タイムラインにアップロード
+              </Button>
+              <LinkToTimeLine />
+            </Box>
+          )}
+        </Flex>
       </Center>
     </Box>
   );
