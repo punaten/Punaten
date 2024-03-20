@@ -26,6 +26,11 @@ function App() {
         }
     }
 
+    //useEffectで初回ロード時にfetchFilesを実行
+    useEffect(() => {
+        fetchFiles();
+    }, []);
+
     const handleBackgroundFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files || files.length === 0) return;
@@ -131,13 +136,10 @@ function App() {
             setLoading(false);
         };
 
-
-
         video.play().then(() => {
             requestAnimationFrame(draw);
             mediaRecorder.start();
         });
-
 
         // videoRefが参照するビデオ要素にストリームを設定
         if (videoRef.current) {
@@ -151,9 +153,7 @@ function App() {
             alert('背景画像を選択してください');
             return;
         }
-        fetchFiles().then(() => {
-            createChromaKeyComposite();
-        })
+        createChromaKeyComposite();
     }
 
     const handleDownload = () => {
@@ -222,10 +222,6 @@ function App() {
         }
     };
 
-    const handleFetchClick = () => {
-        fetchFiles();
-    }
-
     return (
         <div className="app" style={{margin:"10rem"}}>
             <h1>猫ミーム no 動画生成</h1>
@@ -236,7 +232,8 @@ function App() {
             </div>
             <button onClick={handleClickGenerate}>動画をつくる</button>
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas> {/* canvasを非表示に */}
-            <video ref={videoRef} controls autoPlay style={{ maxWidth: '100%' }}></video> {/* video要素を追加 */}
+            <video ref={videoRef} controls autoPlay style={{ maxWidth: '80dvw', maxHeight:'80dvh' }}></video> {/* video要素を追加 */}
+            {/* <video src={downloadUrl} controls style={{ maxWidth: '100%' }}></video> video要素を追加 */}
             {downloadUrl && <Button onClick={handleDownload}>動画をダウンロード</Button>}
             {downloadUrl && <Button onClick={handleUploadVideo}>タイムラインにアップロード</Button>}
         </div>
