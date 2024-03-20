@@ -1,6 +1,25 @@
 import { Box, Button, Center, Flex } from "@yamada-ui/react";
 import { useRecording } from "~/components/detection/useRecording";
 import DisplayProgresses from "~/components/recording/DisplayProgresses";
+import { redirect } from "@remix-run/cloudflare";
+import { ActionFunction } from "@remix-run/cloudflare";
+import { Form, Link } from "@remix-run/react";
+
+// export const action: ActionFunction = async () => {
+//   const { arrayBuffer, blob } = await fetchFiles(); // データ取得
+
+//   // ArrayBufferとBlobをBase64エンコード
+//   const encodedArrayBuffer = Buffer.from(arrayBuffer).toString('base64');
+//   const encodedBlob = Buffer.from(await blob.arrayBuffer()).toString('base64');
+
+//   // リダイレクトとデータの受け渡し
+//   return redirect(`/video?arrayBuffer=${encodedArrayBuffer}&blob=${encodedBlob}`);
+// };
+
+//string[]の配列をクエリに変換
+const ArraytoQuery = (array: string[]) => {
+  return array.map((value, index) => `array[${index}]=${value}`).join('&');
+}
 
 export default function Index() {
   const {
@@ -16,7 +35,7 @@ export default function Index() {
     remainingTime,
     phase,
     miniPhase,
-  } = useRecording();
+    catKind, } = useRecording();
 
   return (
     <Center h={"full"}>
@@ -103,3 +122,5 @@ export default function Index() {
     </Center>
   );
 }
+
+
