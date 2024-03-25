@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,6 +14,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/google/uuid"
+	"github.com/punaten/Punaten/back/server/db"
+	"github.com/punaten/Punaten/back/server/domain"
 	"google.golang.org/api/option"
 
 	_ "github.com/lib/pq"
@@ -24,15 +25,8 @@ const (
 	bucketName = "punaten"
 )
 
-type Video struct {
-	ID         string `json:"id" db:"id"`
-	User_ID    string `json:"user_id" db:"user_id"`
-	Name       string `json:"name" db:"name"`
-	Created_at string `json:"created_at" db:"created_at"`
-}
-
 func main() {
-	migrate()
+	// migrate(pg_db, azure_db)
 	r := chi.NewRouter()
 
 	corsMiddleware := cors.New(cors.Options{
@@ -62,43 +56,11 @@ func main() {
 	}
 }
 
-func migrate() {
-	db_str := os.Getenv("DB_STRING")
-	db, err := sql.Open("postgres", db_str)
-	if err != nil {
-		log.Fatalf("main sql.Open error err:%v", err)
-	}
-	defer db.Close()
-
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS video (id VARCHAR(255) PRIMARY KEY, user_id VARCHAR(255), name VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-	if err != nil {
-		log.Fatalf("main db.Exec error err:%v", err)
-	}
-}
-
-func alldrop() {
-	db_str := os.Getenv("DB_STRING")
-	db, err := sql.Open("postgres", db_str)
-	if err != nil {
-		log.Fatalf("main sql.Open error err:%v", err)
-	}
-	defer db.Close()
-
-	_, err = db.Exec("DROP TABLE video")
-	if err != nil {
-		log.Fatalf("main db.Exec error err:%v", err)
-	}
-}
-
 func getVideo(w http.ResponseWriter, r *http.Request) {
-	db_str := os.Getenv("DB_STRING")
-	db, err := sql.Open("postgres", db_str)
-	if err != nil {
-		log.Fatalf("main sql.Open error err:%v", err)
-	}
+	db := db.Azure_db()
 	defer db.Close()
 
-	var video []Video
+	var video []domain.Video
 
 	qRow, err := db.Query("SELECT * FROM video ORDER BY created_at")
 	if err != nil {
@@ -106,8 +68,8 @@ func getVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for qRow.Next() {
-		var v Video
-		err = qRow.Scan(&v.ID, &v.User_ID, &v.Name, &v.Created_at)
+		var v domain.Video
+		err = qRow.Scan(&v.ID, &v.UserID, &v.Name, &v.CreatedAt)
 		if err != nil {
 			log.Fatalf("main db.QueryRow error err:%v", err)
 		}
@@ -124,11 +86,7 @@ func getVideo(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadFileForGCS(w http.ResponseWriter, r *http.Request) {
-	db_str := os.Getenv("DB_STRING")
-	db, err := sql.Open("postgres", db_str)
-	if err != nil {
-		log.Fatalf("main sql.Open error err:%v", err)
-	}
+	db := db.Azure_db()
 	defer db.Close()
 
 	gcs_key := os.Getenv("GCS_KEY")
@@ -168,7 +126,7 @@ func uploadFileForGCS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.QueryRow("INSERT INTO video(id, user_id, name) VALUES($1,$2,$3)", uuid_str, "1", uuid_str+handler.Filename).Err()
+	err = db.QueryRow("INSERT INTO video (id, user_id, name) VALUES (@p1, @p2, @p3)", uuid_str, "1", uuid_str+handler.Filename).Err()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
