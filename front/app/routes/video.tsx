@@ -14,6 +14,9 @@ import {
 } from "@yamada-ui/react";
 import React, { useEffect, useRef, useState } from "react";
 import LinkToTimeLine from "~/components/LinkToTimeLIne";
+import MotionButton from "~/components/global/MotionButton";
+import ButtonWithBorder from "~/components/video/ButtonWithBorder";
+import MotionButtonWithBorder from "~/components/video/MotionButtonWithBorder";
 
 function App() {
   const [fileSrc, setFileSrc] = useState<string[]>([
@@ -60,10 +63,10 @@ function App() {
     if (!files || files.length === 0) return;
     const file = files[0];
     setBackgroundSrc(URL.createObjectURL(file));
+    setDownloadUrl("");
   };
 
   const createChromaKeyComposite = async () => {
-    debugger;
     if (!canvasRef.current || !videoRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -313,35 +316,50 @@ function App() {
         </Modal>
       )}
       <Center p={12} h={"100dvh"}>
-        <Flex direction={"column"} alignContent={"space-evenly"} h={"full"}>
-          <Box fontSize={"3rem"}>動画をつくる</Box>
+        <Flex
+          direction={"column"}
+          justifyContent={"space-around"}
+          h={"full"}
+          p={"8vh"}
+        >
+          {!isLoading && (
+            <Box
+              color={["cinnamon", "caramel"]}
+              fontSize={"3rem"}
+              textAlign={"center"}
+            >
+              - 動画をつくる -
+            </Box>
+          )}
           {/* <Button onClick={handleFetchClick}>fetch</Button> */}
           <Box display={"none"}>{fetchVideoURL}</Box>
-          <Button
-            fontSize={18}
-            width={"full"}
-            py={6}
-            bg={["cinnamon", "cream-dark"]}
-            color={["cream-light", "dark"]}
-            onClick={handleClickGenerate}
-          >
-            動画を生成する
-          </Button>
-          <Button
-            fontSize={18}
-            width={"full"}
-            py={6}
-            borderWidth={4}
-            borderBlockStyle={"solid"}
-            borderColor={["cinnamon", "cream-dark"]}
-            bg={["cream-light", "dark"]}
-            color={["cinnamon", "cream-dark"]}
-            onClick={() => setBackgroundSrc("")}
-          >
-            画像を変更する
-          </Button>
+          {!isVideoFetching && !isLoading && !downloadUrl && (
+            <MotionButton onClick={handleClickGenerate}>
+              動画を生成する
+            </MotionButton>
+          )}
           <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
           {/* canvasを非表示に */}
+          {downloadUrl && (
+            <Flex direction={"column"} gap={12}>
+              <Flex>
+                <MotionButtonWithBorder onClick={handleDownload}>
+                  動画をダウンロード
+                </MotionButtonWithBorder>
+                <MotionButtonWithBorder onClick={handleUploadVideo}>
+                  タイムラインにアップロード
+                </MotionButtonWithBorder>
+              </Flex>
+              <Center>
+                <LinkToTimeLine />
+              </Center>
+            </Flex>
+          )}
+          {!isVideoFetching && !isLoading && (
+            <ButtonWithBorder onClick={() => setBackgroundSrc("")}>
+              画像を変更する
+            </ButtonWithBorder>
+          )}
           <video
             ref={videoRef}
             controls
@@ -352,17 +370,6 @@ function App() {
               display: `${isLoading ? "block" : "none"}`,
             }}
           ></video>{" "}
-          {downloadUrl && (
-            <Button onClick={handleDownload}>動画をダウンロード</Button>
-          )}
-          {downloadUrl && (
-            <Box>
-              <Button onClick={handleUploadVideo}>
-                タイムラインにアップロード
-              </Button>
-              <LinkToTimeLine />
-            </Box>
-          )}
         </Flex>
       </Center>
     </Box>
